@@ -1,0 +1,81 @@
+<!-- features/test/test.html -->
+<div class="container">
+  <h1 class="welcome-title">Test de Estilos de Aprendizaje</h1>
+
+  <div class="content">
+    @if (!answeredBy) {
+      <section class="card">
+        <h2 class="card-title">¿Quién responderá el test?</h2>
+
+        <div class="role-grid">
+          <label class="role-option">
+            <input type="radio" name="who" [(ngModel)]="selectedRole" value="alumno" />
+            <span class="role-text">Soy el estudiante</span>
+          </label>
+
+          <label class="role-option">
+            <input type="radio" name="who" [(ngModel)]="selectedRole" value="representante" />
+            <span class="role-text">Soy el padre/maestro</span>
+          </label>
+        </div>
+
+        <button class="btn" [disabled]="!selectedRole" (click)="confirmRole()">Continuar</button>
+      </section>
+    }
+
+    <!-- SOLO si hay rol confirmado Y preguntas cargadas -->
+    @if (answeredBy && questions.length) {
+      <section class="card card-test">
+        <div class="progress">
+          <div class="progress-head">
+            <span>Pregunta {{ index + 1 }} de {{ questions.length }}</span>
+            <span class="progress-pct">
+              {{ ((index + 1) * 100 / questions.length) | number:'1.0-0' }}%
+            </span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="(index + 1) * 100 / questions.length"></div>
+          </div>
+        </div>
+
+        <h3 class="question-text">{{ current()?.text }}</h3>
+
+        <div class="options">
+          <label class="option-chip">
+            <input type="radio"
+                   [name]="'q'+(current()?.id ?? 0)"
+                   [checked]="answers[current()?.id ?? 0]===0"
+                   (change)="setAnswer(current()?.id!, 0)" />
+            <span>0 = Nada</span>
+          </label>
+
+          <label class="option-chip">
+            <input type="radio"
+                   [name]="'q'+(current()?.id ?? 0)"
+                   [checked]="answers[current()?.id ?? 0]===1"
+                   (change)="setAnswer(current()?.id!, 1)" />
+            <span>1 = Poco</span>
+          </label>
+
+          <label class="option-chip">
+            <input type="radio"
+                   [name]="'q'+(current()?.id ?? 0)"
+                   [checked]="answers[current()?.id ?? 0]===2"
+                   (change)="setAnswer(current()?.id!, 2)" />
+            <span>2 = Mucho</span>
+          </label>
+        </div>
+
+        <div class="nav">
+          <button class="btn btn-secondary" (click)="prev()" [disabled]="index===0">Anterior</button>
+
+          @if (index < questions.length - 1) {
+            <button class="btn" (click)="next()" [disabled]="answers[current()?.id ?? 0]===undefined">Siguiente</button>
+          } @else {
+            <button class="btn primary" (click)="submit()" [disabled]="!canSubmit()">Finalizar test</button>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</div>

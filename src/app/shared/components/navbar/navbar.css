@@ -1,0 +1,98 @@
+/* fondo claro como el resto */
+.nav-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #F0F4F8;              /* #F0F4F8 aprox */
+  border-bottom: 1px solid #F0F4F8;
+  border-radius: 0 0 35px 35px;
+}
+
+/* marca */
+.brand {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2563EB;                   /* azul */
+  cursor: pointer;
+  user-select: none;
+}
+
+/* botón hamburguesa (solo móvil) */
+.hamb {
+  display: none;
+  background: transparent;
+  border: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+/* contenedor píldora */
+.pill {
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #2563EB;              /* azul */
+  border-radius: 999px;
+  padding: 0.9rem;
+  width: fit-content;
+}
+
+/* enlaces dentro de la píldora */
+.pill a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  color: #eaf1ff;
+  text-decoration: none;
+  font-weight: 600;
+  /*transition: background 120ms ease, color 120ms ease, transform 60ms;*/
+}
+
+.pill a:hover { transform: translateY(-1px); }
+
+/* estado activo (chip blanco) */
+.pill a.active {
+  background: #ffffff;
+  color: #374472;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* iconos y texto */
+.ico { font-size: 1rem; }
+.tx  { font-size: 0.95rem; }
+
+/* botón salir */
+.logout {
+  background: transparent;
+  border: 2px solid #2563EB;
+  color: #2563EB;
+  border-radius: 10px;
+  padding: 1rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+.logout:hover {
+  background: #2563EB;
+  color: #fff;
+}
+
+/* ===== responsive ===== */
+@media (max-width: 800px) {
+  .nav-wrap {
+    grid-template-columns: auto auto 1fr;
+  }
+  .pill {
+    display: none;
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin-top: 0.75rem;
+  }
+  .pill.open { display: flex; flex-wrap: wrap; }
+  .hamb { display: inline-block; }
+}

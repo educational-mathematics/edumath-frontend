@@ -1,0 +1,30 @@
+<header class="nav-wrap">
+  <div class="brand" routerLink="/home">{{ appTitle }}</div>
+
+  <!-- botón móvil -->
+  <button class="hamb" (click)="toggleMobile()" aria-label="Menú">
+    ☰
+  </button>
+
+  <!-- contenedor píldora -->
+  <nav class="pill" [class.open]="mobileOpen">
+    <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">📖</span> <span class="tx">Inicio</span>
+    </a>
+
+    <a routerLink="/assistant" routerLinkActive="active">
+      <span class="ico">✨</span> <span class="tx">Asistente</span>
+    </a>
+
+    <a routerLink="/profile" routerLinkActive="active">
+      <span class="ico">👤</span> <span class="tx">Perfil</span>
+    </a>
+
+    <a routerLink="/settings" routerLinkActive="active">
+      <span class="ico">⚙️</span> <span class="tx">Ajustes</span>
+    </a>
+  </nav>
+
+  <!-- salir -->
+  <button class="logout" (click)="logout()" aria-label="Cerrar sesión">↪</button>
+</header>

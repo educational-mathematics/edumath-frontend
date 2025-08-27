@@ -1,0 +1,30 @@
+<div class="container">
+  <!-- Título grande -->
+  <h1 class="welcome-title">
+    ¡Bienvenido a EduMath!
+  </h1>
+
+  <div class="content">
+    <!-- Imagen a la izquierda -->
+    <div class="image-container">
+      <img src="assets/kimi.png" alt="Kimi" />
+    </div>
+
+    <!-- Card blanca con borde azul -->
+    <div class="card">
+      <p>
+        👋 Hola <strong>{{ userName }}</strong>, mi nombre es <strong>Kimi</strong>, seré tu
+        acompañante en tu proceso de aprendizaje. Antes de empezar debo evaluar
+        tu estilo de aprendizaje; para esto deberás hacer un test.<br>
+        ¿Estás listo?
+      </p>
+    </div>
+  </div>
+
+  <!-- Botón debajo de la card -->
+  <div class="button-container">
+    <button (click)="goToTest()" class="btn">
+      Comenzar Test
+    </button>
+  </div>
+</div>

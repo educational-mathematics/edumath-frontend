@@ -1,0 +1,160 @@
+/* ===== Base / Layout ===== */
+.container {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #F0F4F8; /* gris claro */
+  padding: 2rem 1.5rem;
+}
+
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 3.5rem;
+  margin-top: 3.5rem;
+  color: #1d4ed8; /* azul */
+}
+
+.content {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.25rem;
+}
+
+/* ===== Tarjetas / Botones ===== */
+.card {
+  background-color: #fff;
+  border: 2px solid #3b82f6; /* azul */
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  color: #374151; /* gris oscuro */
+}
+
+.card-title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  color: #374472;
+}
+
+.btn {
+  padding: 0.75rem 1.25rem;
+  background-color: #2563EB;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s;
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
+}
+
+.btn:hover { background-color: #1d4ed8; }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-secondary {
+  background-color: #64748b; /* slate */
+  box-shadow: 0 4px 8px rgba(100, 116, 139, 0.25);
+}
+.btn-secondary:hover { background-color: #475569; }
+
+.btn.primary { background-color: #2563EB; }
+
+/* ===== Selección de rol ===== */
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin: 0.75rem 0 1.25rem;
+}
+@media (min-width: 640px) {
+  .role-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1.5px dashed #93c5fd;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: #f8fbff;
+}
+.role-option input { transform: scale(1.15); }
+.role-text { font-weight: 600; color: #1e40af; }
+
+/* ===== Tarjeta del test ===== */
+.card-test {
+  display: grid;
+  gap: 1rem;
+}
+
+/* ===== Progreso ===== */
+.progress { display: grid; gap: 0.5rem; }
+.progress-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-weight: 600; color: #1e40af;
+}
+.progress-pct { font-variant-numeric: tabular-nums; }
+
+.progress-track {
+  width: 100%; height: 10px;
+  background: #e5efff;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #bfdbfe;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #60a5fa, #2563EB);
+  width: 0%;
+  border-radius: 999px;
+  transition: width 180ms ease;
+}
+
+/* ===== Pregunta ===== */
+.question-text {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #374472;
+  margin: 0.25rem 0 0.5rem;
+}
+
+/* ===== Opciones ===== */
+.options {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.option-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1.5px solid #c7dbff;
+  background: #f9fbff;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.option-chip:hover {
+  border-color: #93c5fd;
+  background: #f3f8ff;
+}
+.option-chip input { transform: scale(1.15); }
+.option-chip span { font-weight: 600; color: #1f2937; }
+
+/* ===== Navegación ===== */
+.nav {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}

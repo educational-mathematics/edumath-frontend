@@ -1,0 +1,96 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "juan",
+      "password": "123456",
+      "email": "juan@example.com"
+    },
+    {
+      "id": "b49c",
+      "name": "Mario",
+      "email": "mario@demo.com",
+      "password": "123456"
+    },
+    {
+      "id": "8300",
+      "name": "test",
+      "email": "test@demo",
+      "password": "123456"
+    },
+    {
+      "id": "f911",
+      "name": "test",
+      "email": "test@demo.com",
+      "password": "123456",
+      "firstLoginDone": false
+    },
+    {
+      "id": "0d44",
+      "name": "german",
+      "email": "german@gmail.com",
+      "password": "123456",
+      "firstLoginDone": true,
+      "vakStyle": "kinestesico",
+      "vakScores": {
+        "visual": 11,
+        "auditivo": 11,
+        "kinestesico": 20
+      },
+      "testAnsweredBy": "alumno",
+      "testDate": "2025-08-20T04:46:35.985Z"
+    },
+    {
+      "id": "e8e2",
+      "name": "Mario Vargas",
+      "email": "mario@gmail.com",
+      "password": "666666",
+      "firstLoginDone": false
+    },
+    {
+      "id": "12ae",
+      "name": "Maria",
+      "email": "mm@gmail.com",
+      "password": "555666",
+      "firstLoginDone": true,
+      "vakStyle": "visual",
+      "vakScores": {
+        "visual": 22,
+        "auditivo": 0,
+        "kinestesico": 1
+      },
+      "testAnsweredBy": "alumno",
+      "testDate": "2025-08-20T03:49:56.246Z"
+    },
+    {
+      "id": "fa0e",
+      "name": "Bravito",
+      "email": "brave@gmail.com",
+      "password": "444555",
+      "firstLoginDone": true,
+      "vakStyle": "kinestesico",
+      "vakScores": {
+        "visual": 10,
+        "auditivo": 14,
+        "kinestesico": 16
+      },
+      "testAnsweredBy": "representante",
+      "testDate": "2025-08-20T04:34:12.929Z"
+    },
+    {
+      "id": "51ba",
+      "name": "Santos Alexis",
+      "email": "santos@gmail.com",
+      "password": "999999",
+      "firstLoginDone": true,
+      "vakStyle": "kinestesico",
+      "vakScores": {
+        "visual": 13,
+        "auditivo": 12,
+        "kinestesico": 19
+      },
+      "testAnsweredBy": "representante",
+      "testDate": "2025-08-21T03:34:34.044Z"
+    }
+  ]
+}

@@ -1,82 +1,102 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap, catchError } from 'rxjs';
-import { of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Api } from './api';
+import { Observable, of, map, switchMap, tap, catchError } from 'rxjs';
 import { User } from './models/user.model';
 import { LoginRequest } from './models/login.model';
 import { RegisterRequest } from './models/register.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+type Purpose = 'register' | 'reset_password';
+
+interface Token {
+  access_token: string;
+  token_type: string; // "bearer"
+}
+
+@Injectable({ providedIn: 'root' })
 export class Auth {
-  private apiUrl = 'http://localhost:3000/users';
+  private api = inject(Api);
 
-  constructor(private http: HttpClient) {}
+  private tokenKey = 'token';
+  private userKey = 'user';
 
+  /** LOGIN: envía form-urlencoded con username (email) y password */
   login(data: LoginRequest): Observable<User | null> {
-    const url = `${this.apiUrl}?email=${data.email}&password=${data.password}`;
-    console.log('🔍 Haciendo petición a:', url);
-    
-    return this.http
-      .get<User[]>(url)
+    return this.api
+      .form<Token>('/auth/login', { username: data.email, password: data.password })
       .pipe(
-        tap(response => {
-          console.log('📥 Respuesta cruda del servidor:', response);
-          console.log('📊 Cantidad de usuarios encontrados:', response?.length || 0);
+        tap(t => localStorage.setItem(this.tokenKey, t.access_token)),
+        switchMap(() => this.me()),
+        tap(u => {
+          if (u) localStorage.setItem(this.userKey, JSON.stringify(u));
         }),
-        map(users => {
-          const user = users.length > 0 ? users[0] : null;
-          console.log('👤 Usuario mapeado:', user);
-          return user;
-        }),
-        catchError(error => {
-          console.error('❌ Error en petición de login:', error);
-          console.error('🔧 Detalles del error:', {
-            status: error.status,
-            message: error.message,
-            url: error.url
-          });
+        catchError(err => {
+          console.error('❌ Error login', err);
           return of(null);
         })
       );
   }
 
+  /** REGISTER: el backend ya envía el código por correo */
   register(data: RegisterRequest): Observable<User> {
-    const userWithFlag = {
-      ...data,
-      firstLoginDone: false
-    };
-    return this.http.post<User>(this.apiUrl, userWithFlag);
+    // Puedes añadir más campos si luego decides (vakStyle, etc.)
+    return this.api.post<any>('/auth/register', data).pipe(map(this.mapUserDto));
   }
 
+  /** Enviar código de verificación o de reset */
+  sendCode(email: string, purpose: Purpose) {
+    return this.api.post<{ message: string }>('/verification/send', { email, purpose });
+  }
+
+  /** Verificar código; si es de registro, marca email_verified=True en backend */
+  verifyCode(email: string, code: string, purpose: Purpose) {
+    return this.api.post<{ message: string }>('/verification/verify', { email, code, purpose });
+  }
+
+  /** Forgot / Reset password */
+  forgot(email: string) {
+    return this.api.post<{ message: string }>('/auth/forgot', { email });
+  }
+
+  reset(email: string, code: string, newPassword: string) {
+    return this.api.post<{ message: string }>('/auth/reset', {
+      email,
+      code,
+      new_password: newPassword,
+    });
+  }
+
+  /** Usuario actual (requiere token) */
+  me(): Observable<User> {
+    return this.api.get<any>('/users/me').pipe(map(this.mapUserDto));
+  }
+
+  /** Storage helpers */
   getCurrentUser(): User | null {
-    const raw = localStorage.getItem('user');
+    const raw = localStorage.getItem(this.userKey);
     if (!raw) return null;
     try {
-      const u = JSON.parse(raw);
-      // valida forma mínima
-      if (
-        u && (typeof u.id === 'number' || typeof u.id === 'string') &&
-        typeof u.email === 'string' &&
-        typeof u.firstLoginDone === 'boolean'
-      ) return u as User;
-      return null; // cualquier objeto inválido => no logueado
-    } catch { return null; }
+      return JSON.parse(raw) as User;
+    } catch {
+      return null;
+    }
   }
 
-  updateUser(partial: Partial<User>): Observable<User> {
-    const user = this.getCurrentUser();
-    if (!user) throw new Error('No hay sesión');
-  
-    const updated = { ...user, ...partial };
-
-    return this.http.put<User>(`${this.apiUrl}/${user.id}`, updated).pipe(
-      map(u => {
-        // actualizar storage también
-        localStorage.setItem('user', JSON.stringify(u));
-        return u;
-      })
-    );
+  logout() {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
   }
+
+  /** Mapea snake_case del backend a camelCase del front */
+  private mapUserDto = (dto: any): User => ({
+    id: dto.id,
+    email: dto.email,
+    name: dto.name,
+    firstLoginDone: dto.first_login_done ?? false,
+    emailVerified: dto.email_verified ?? false,
+    avatarUrl: dto.avatar_url ?? undefined,
+    vakStyle: dto.vak_style ?? undefined,
+    vakScores: dto.vak_scores ?? undefined,
+    testAnsweredBy: dto.test_answered_by ?? undefined,
+    testDate: dto.test_date ?? undefined,
+  });
 }

@@ -52,9 +52,12 @@ export class Register {
     this.authService.register({ name, email, password }).subscribe({
       next: () => {
         this.loading = false;
-        // El backend ya envió un código a tu correo
+        // Mensaje y pase de un solo uso para ingresar a /register/verify-email
         this.showSuccess('Registro exitoso. Revisa tu correo para verificar tu cuenta.');
-        setTimeout(() => this.router.navigate(['/login']), 1500);
+        sessionStorage.setItem('allowVerifyEmail', '1');
+        setTimeout(() => {
+          this.router.navigate(['/register/verify-email'], { queryParams: { email } });
+        }, 1200);
       },
       error: (error) => {
         this.loading = false;

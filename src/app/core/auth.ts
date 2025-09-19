@@ -99,4 +99,22 @@ export class Auth {
     testAnsweredBy: dto.test_answered_by ?? undefined,
     testDate: dto.test_date ?? undefined,
   });
+
+   /** Actualiza datos del usuario actual (requiere token). */
+  updateUser(partial: Partial<User>): Observable<User> {
+    // mapeamos camelCase -> snake_case para el backend
+    const payload: any = {};
+    if (partial.name !== undefined) payload.name = partial.name;
+    if (partial.firstLoginDone !== undefined) payload.first_login_done = partial.firstLoginDone;
+    if (partial.vakStyle !== undefined) payload.vak_style = partial.vakStyle;
+    if (partial.vakScores !== undefined) payload.vak_scores = partial.vakScores;
+    if (partial.testAnsweredBy !== undefined) payload.test_answered_by = partial.testAnsweredBy;
+    if (partial.testDate !== undefined) payload.test_date = partial.testDate;
+    if (partial.avatarUrl !== undefined) payload.avatar_url = partial.avatarUrl;
+
+    return this.api.put<any>('/users/me', payload).pipe(
+      map(this.mapUserDto),
+      tap(u => localStorage.setItem(this.userKey, JSON.stringify(u)))
+    );
+  }
 }

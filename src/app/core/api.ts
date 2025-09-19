@@ -22,6 +22,10 @@ export class Api {
     return this.http.post<T>(`${this.base}${path}`, body);
   }
 
+  put<T>(path: string, body: any) {
+    return this.http.put<T>(`${this.base}${path}`, body);
+  }
+
   // Para /auth/login con OAuth2PasswordRequestForm (x-www-form-urlencoded)
   form<T>(path: string, form: Record<string, string>) {
     const body = new URLSearchParams();

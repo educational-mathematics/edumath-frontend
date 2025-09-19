@@ -1,0 +1,49 @@
+<div class="container">
+  <mat-card class="card">
+    <mat-card-header class="header-centered">
+      <mat-card-title class="logo">Recuperar contraseña</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Paso 1 -->
+      @if (step === 1) {
+        <form [formGroup]="emailForm" (ngSubmit)="sendCode()">
+          <p>Ingresa tu correo y te enviaremos un código de verificación.</p>
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="tucorreo@dominio.com" />
+          </mat-form-field>
+          <button mat-raised-button color="primary" type="submit" [disabled]="emailForm.invalid || loading">
+            {{ loading ? 'Enviando...' : 'Enviar código' }}
+          </button>
+        </form>
+      }
+
+      <!-- Paso 2 -->
+      @if (step === 2) {
+        <form [formGroup]="resetForm" (ngSubmit)="reset()">
+          <p>Revisa tu correo, ingresa el código y tu nueva contraseña.</p>
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Código</mat-label>
+            <input matInput type="text" formControlName="code" maxlength="6" placeholder="000000" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Nueva contraseña</mat-label>
+            <input matInput type="password" formControlName="password" />
+          </mat-form-field>
+          <button mat-raised-button color="primary" type="submit" [disabled]="resetForm.invalid || loading">
+            {{ loading ? 'Actualizando...' : 'Actualizar contraseña' }}
+          </button>
+        </form>
+      }
+
+      @if (message) {
+        <div class="msg">{{ message }}</div>
+      }
+
+      <div class="links">
+        <a routerLink="/login">Volver al login</a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

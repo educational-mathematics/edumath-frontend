@@ -10,10 +10,23 @@ import { Assistant } from './features/assistant/assistant';
 import { publicGuard } from './core/guards/public-guard';
 import { onboardingGuard } from './core/guards/onboarding-guard';
 import { authGuard } from './core/guards/auth-guard';
+import { verifyEntryGuard } from './core/guards/verify-entry-guard';
+import { forgotEntryGuard } from './core/guards/forgot-entry-guard';
 
 export const routes: Routes = [
     { path: 'login', component: Login, canActivate: [publicGuard] },
     { path: 'register', component: Register, canActivate: [publicGuard] },
+    
+    // nuevas rutas protegidas por "pase"
+    { path: 'register/verify-email',
+        loadComponent: () => import('./features/auth/verify-email/verify-email').then(m => m.VerifyEmail),
+        canActivate: [publicGuard, verifyEntryGuard]
+    },
+    { path: 'login/forgot',
+        loadComponent: () => import('./features/auth/forgot/forgot').then(m => m.Forgot),
+        canActivate: [publicGuard, forgotEntryGuard]
+    },
+
     { path: 'welcome', component: Welcome, canActivate: [onboardingGuard] }, 
     { path: 'test', component: Test, canActivate: [onboardingGuard] },
     { path: 'home', component: Home, canActivate: [authGuard] },

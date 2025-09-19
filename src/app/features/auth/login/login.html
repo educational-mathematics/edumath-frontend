@@ -15,9 +15,14 @@
             <input matInput type="password" formControlName="password" placeholder="Contraseña" [class.invalid-input]="isInvalid('password')" />
         </mat-form-field>
 
-        <button mat-raised-button color="primary" type="submit" class="login-button">Ingresar</button>
+        <button mat-raised-button color="primary" type="submit" class="login-button" [disabled]="loading">
+            {{ loading ? 'Ingresando...' : 'Ingresar' }}
+        </button>
         </form>
 
+        <div class="aux-links">
+            <a (click)="goForgotPassword()">¿Olvidaste tu contraseña?</a>
+        </div>
         <!-- Notificación flotante con @if -->
         @if (showNotification) {
         <div class="notification">

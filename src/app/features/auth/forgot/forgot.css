@@ -1,0 +1,5 @@
+.container { display: flex; justify-content: center; padding: 24px; }
+.card { width: 420px; max-width: 100%; }
+.full { width: 100%; }
+.msg { margin-top: 8px; color: #555; }
+.links { margin-top: 12px; }

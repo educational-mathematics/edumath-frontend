@@ -67,6 +67,12 @@ export class Login {
     });
   }
 
+  goForgotPassword() {
+    // Pase de un solo uso para entrar a /login/forgot
+    sessionStorage.setItem('allowForgot', '1');
+    this.router.navigate(['/login/forgot']);
+  }
+
   isInvalid(controlName: string) {
     const control = this.loginForm.get(controlName);
     return control?.invalid && this.loginAttempted;

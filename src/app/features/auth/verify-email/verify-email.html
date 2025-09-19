@@ -1,0 +1,39 @@
+<div class="container">
+  <mat-card class="card">
+    <mat-card-header class="header-centered">
+      <mat-card-title class="logo">Verificar correo</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p>Ingresa el código de 6 dígitos que enviamos a tu correo.</p>
+
+      <form [formGroup]="form" (ngSubmit)="verify()" class="form">
+        <label class="custom-label">Correo electrónico</label>
+        <mat-form-field appearance="outline" class="full">
+          <input matInput type="email" formControlName="email" placeholder="tucorreo@dominio.com" />
+        </mat-form-field>
+
+        <label class="custom-label">Código</label>
+        <mat-form-field appearance="outline" class="full">
+          <input matInput type="text" formControlName="code" maxlength="6" placeholder="000000" />
+        </mat-form-field>
+
+        <div class="actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">
+            {{ loading ? 'Verificando...' : 'Verificar' }}
+          </button>
+
+          <button mat-button type="button" (click)="resend()" [disabled]="cooldown > 0 || loading">
+            Reenviar código {{ cooldown > 0 ? '(' + cooldown + 's)' : '' }}
+          </button>
+        </div>
+
+        <div class="msg" *ngIf="message">{{ message }}</div>
+      </form>
+
+      <div class="links">
+        <a routerLink="/login">Volver al login</a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

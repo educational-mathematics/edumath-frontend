@@ -119,3 +119,22 @@
   color: white;
   cursor: pointer;
 }
+
+
+.aux-links {
+    text-align: center;
+    margin-top: 1rem; 
+}
+
+.forgot-password {
+    font-size: 0.875rem;
+    color: #2563EB; 
+    transition-property: color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 0.2s;
+}
+
+.forgot-password:hover {
+    color: #1e40af; 
+    text-decoration: underline;
+}

@@ -24,10 +24,10 @@ export class Auth {
     return this.api
       .form<Token>('/auth/login', { username: data.email, password: data.password })
       .pipe(
-        tap(t => localStorage.setItem(this.tokenKey, t.access_token)),
+        tap(t => sessionStorage.setItem(this.tokenKey, t.access_token)),
         switchMap(() => this.me()),
         tap(u => {
-          if (u) localStorage.setItem(this.userKey, JSON.stringify(u));
+          if (u) sessionStorage.setItem(this.userKey, JSON.stringify(u));
         }),
         catchError(err => {
           console.error('❌ Error login', err);
@@ -72,7 +72,7 @@ export class Auth {
 
   /** Storage helpers */
   getCurrentUser(): User | null {
-    const raw = localStorage.getItem(this.userKey);
+    const raw = sessionStorage.getItem(this.userKey);
     if (!raw) return null;
     try {
       return JSON.parse(raw) as User;
@@ -82,8 +82,8 @@ export class Auth {
   }
 
   logout() {
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
+    sessionStorage.removeItem(this.tokenKey);
+    sessionStorage.removeItem(this.userKey);
   }
 
   /** Mapea snake_case del backend a camelCase del front */
@@ -114,7 +114,14 @@ export class Auth {
 
     return this.api.put<any>('/users/me', payload).pipe(
       map(this.mapUserDto),
-      tap(u => localStorage.setItem(this.userKey, JSON.stringify(u)))
+      tap(u => sessionStorage.setItem(this.userKey, JSON.stringify(u)))
     );
+  }
+
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.api.post<{ message: string }>('/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
   }
 }

@@ -10,7 +10,7 @@
       <form [formGroup]="form" (ngSubmit)="verify()" class="form">
         <label class="custom-label">Correo electrónico</label>
         <mat-form-field appearance="outline" class="full">
-          <input matInput type="email" formControlName="email" placeholder="tucorreo@dominio.com" />
+          <input matInput type="email" formControlName="email" placeholder="tucorreo@dominio.com" [readonly]="true" aria-readonly="true"/>
         </mat-form-field>
 
         <label class="custom-label">Código</label>
@@ -22,18 +22,20 @@
           <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">
             {{ loading ? 'Verificando...' : 'Verificar' }}
           </button>
-
-          <button mat-button type="button" (click)="resend()" [disabled]="cooldown > 0 || loading">
-            Reenviar código {{ cooldown > 0 ? '(' + cooldown + 's)' : '' }}
-          </button>
         </div>
 
-        <div class="msg" *ngIf="message">{{ message }}</div>
+        <button mat-button type="button" (click)="resend()" [disabled]="cooldown > 0 || loading">
+            Reenviar código {{ cooldown > 0 ? '(' + cooldown + 's)' : '' }}
+          </button>
+
+        @if (message) {
+          <div class="msg">{{ message }}</div>
+        }
       </form>
 
-      <div class="links">
+      <!---<div class="links">
         <a routerLink="/login">Volver al login</a>
-      </div>
+      </div>--->
     </mat-card-content>
   </mat-card>
 </div>

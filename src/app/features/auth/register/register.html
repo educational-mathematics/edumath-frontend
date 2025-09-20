@@ -20,7 +20,8 @@
             <input matInput type="password" formControlName="password" placeholder="Contraseña" [class.invalid-input]="isInvalid('password')" />
         </mat-form-field>
 
-        <button mat-raised-button color="primary" type="submit" class="register-button">Registrarse</button>
+        <button mat-raised-button color="primary" type="submit" class="register-button" [disabled]="loading">
+            {{ loading ? 'Registrando...' : 'Registrarse' }}</button>
         </form>
 
         <!-- Notificación flotante con @if -->

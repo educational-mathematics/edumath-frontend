@@ -18,7 +18,7 @@ export class Navbar {
   toggleMobile() { this.mobileOpen = !this.mobileOpen; }
 
   logout() {
-    localStorage.removeItem('user'); // o this.auth.logout() si lo tienes
+    sessionStorage.removeItem('user'); // o this.auth.logout() si lo tienes
     this.router.navigateByUrl('/login');
   }
 }

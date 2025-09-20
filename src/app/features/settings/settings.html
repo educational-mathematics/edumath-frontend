@@ -1,2 +1,81 @@
 <app-navbar></app-navbar>
-<p>settings works!</p>
+<div class="page">
+  <div class="card">
+    <div class="card-header">
+      <h2>Configuración</h2>
+      <p>Gestiona tu seguridad y tus preferencias visuales</p>
+    </div>
+
+    <div class="tabs">
+      <button [class.active]="tab==='seguridad'" (click)="setTab('seguridad')">
+        🔐 Seguridad
+      </button>
+      <button [class.active]="tab==='preferencias'" (click)="setTab('preferencias')">
+        🎨 Preferencias
+      </button>
+    </div>
+
+    @if (msg) { <div class="alert success">{{ msg }}</div> }
+    @if (err) { <div class="alert error">{{ err }}</div> }
+
+    @if (tab === 'seguridad') {
+      <div class="section">
+        <div class="info-row">
+          <span class="label">Correo</span>
+          <span class="value">{{ me?.email }}</span>
+        </div>
+
+        <form [formGroup]="securityForm" (ngSubmit)="changePassword()" novalidate>
+          <div class="field">
+            <label for="current">Contraseña actual</label>
+            <input id="current" type="password" formControlName="current" placeholder="••••••••" />
+            @if (securityForm.controls.current.touched && securityForm.controls.current.invalid) {
+              <small class="hint">Mínimo 6 caracteres.</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="password">Nueva contraseña</label>
+            <input id="password" type="password" formControlName="password" placeholder="••••••••" />
+            @if (securityForm.controls.password.touched && securityForm.controls.password.invalid) {
+              <small class="hint">Mínimo 6 caracteres.</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="repeat">Repetir nueva contraseña</label>
+            <input id="repeat" type="password" formControlName="repeat" placeholder="••••••••" />
+            @if (securityForm.controls.repeat.touched && securityForm.controls.repeat.invalid) {
+              <small class="hint">Mínimo 6 caracteres.</small>
+            }
+          </div>
+
+          @if (securityForm.value.password && securityForm.value.repeat && (securityForm.value.password !== securityForm.value.repeat)) {
+            <div class="inline-error">Las contraseñas no coinciden.</div>
+          }
+
+          <button class="primary"
+                  type="submit"
+                  [disabled]="securityForm.invalid || loading || (securityForm.value.password !== securityForm.value.repeat)">
+            {{ loading ? 'Actualizando...' : 'Actualizar contraseña' }}
+          </button>
+        </form>
+      </div>
+    }
+
+    @if (tab === 'preferencias') {
+      <div class="section">
+        <div class="field">
+          <label for="theme">Tema</label>
+          <select id="theme" [(ngModel)]="prefs.theme">
+            <option value="light">Claro</option>
+            <option value="dark">Oscuro</option>
+          </select>
+          <small class="hint">El tema se guarda en tu navegador.</small>
+        </div>
+
+        <button class="primary" (click)="savePrefs()">Guardar preferencias</button>
+      </div>
+    }
+  </div>
+</div>

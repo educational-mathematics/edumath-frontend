@@ -1,9 +1,10 @@
-<!-- features/test/test.html -->
 <div class="container">
   <h1 class="welcome-title">Test de Estilos de Aprendizaje</h1>
 
   <div class="content">
-    @if (!answeredBy) {
+
+    <!-- Paso 0: elegir rol -->
+    @if (!answeredBy && !showResults) {
       <section class="card">
         <h2 class="card-title">¿Quién responderá el test?</h2>
 
@@ -23,8 +24,8 @@
       </section>
     }
 
-    <!-- SOLO si hay rol confirmado Y preguntas cargadas -->
-    @if (answeredBy && questions.length) {
+    <!-- Test activo -->
+    @if (answeredBy && questions.length && !showResults) {
       <section class="card card-test">
         <div class="progress">
           <div class="progress-head">
@@ -49,7 +50,7 @@
             <span>0 = Nada</span>
           </label>
 
-          <label class="option-chip">
+        <label class="option-chip">
             <input type="radio"
                    [name]="'q'+(current()?.id ?? 0)"
                    [checked]="answers[current()?.id ?? 0]===1"
@@ -75,6 +76,47 @@
             <button class="btn primary" (click)="submit()" [disabled]="!canSubmit()">Finalizar test</button>
           }
         </div>
+      </section>
+    }
+
+    <!-- Resultados -->
+    @if (showResults && resultStyle && resultScores) {
+      <section class="card results-card">
+        <div class="results-top">
+          <div class="results-main">
+            <div class="badge">¡Resultado!</div>
+            <h2 class="result-title">
+              Tu estilo de aprendizaje es: <br> <span class="result-highlight">¡ {{ resultStyle | uppercase }} !</span>
+            </h2>
+            <p class="result-sub">Basado en tus respuestas, este es el estilo predominante.</p>
+
+            <div class="scores">
+              <div class="score">
+                <span>Visual</span>
+                <strong>{{ resultScores.visual }}</strong>
+              </div>
+              <div class="score">
+                <span>Auditivo</span>
+                <strong>{{ resultScores.auditivo }}</strong>
+              </div>
+              <div class="score">
+                <span>Kinestésico</span>
+                <strong>{{ resultScores.kinestesico }}</strong>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" (click)="goHome()">Ir al inicio</button>
+            </div>
+          </div>
+
+          <div class="kimi-wrap">
+            <img src="assets/kimi.png" alt="Kimi" class="kimi" />
+          </div>
+        </div>
+
+        <!-- canvas de confetti -->
+        <canvas #confettiCanvas class="confetti-canvas"></canvas>
       </section>
     }
   </div>

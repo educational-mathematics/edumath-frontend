@@ -169,4 +169,10 @@ export class Auth {
       new_password: newPassword,
     });
   }
+
+  checkPassword(currentPassword: string) {
+    return this.api.post<{ ok: boolean }>('/auth/check-password', {
+      current_password: currentPassword,
+    });
+  } 
 }

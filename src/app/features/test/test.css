@@ -158,3 +158,96 @@
   justify-content: flex-end;
   margin-top: 0.5rem;
 }
+
+/* ===== Resultados ===== */
+.results-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.results-top {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .results-top {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+.badge {
+  display: inline-block;
+  background: #e8f0ff;
+  color: #274690;
+  border: 1px solid #c9dbff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  margin-bottom: .5rem;
+}
+
+.result-title {
+  font-size: clamp(1.6rem, 2.6vw + 1rem, 2.4rem);
+  color: #0f172a;
+}
+.result-highlight {
+  color: #2563eb;
+  text-shadow: 0 6px 16px rgba(37,99,235,.2);
+}
+
+.result-sub {
+  margin: .25rem 0 1rem;
+  color: #475569;
+}
+
+.scores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: .75rem;
+  margin: .75rem 0 1rem;
+}
+.score {
+  background: #f8fbff;
+  border: 1px solid #dbe8ff;
+  border-radius: .75rem;
+  padding: .75rem;
+  text-align: center;
+}
+.score span {
+  display: block; color: #475569; font-weight: 600;
+}
+.score strong {
+  display: block; color: #0f172a; font-size: 1.35rem; margin-top: .25rem;
+}
+
+.kimi-wrap {
+  display: grid;
+  place-items: center;
+}
+.kimi {
+  width: min(280px, 80%);
+  height: auto;
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,0.18));
+}
+
+/* Canvas confetti posicionado sobre la tarjeta */
+.confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Evita solapamiento del resultado con el texto anterior */
+.result-title {
+  line-height: 1.25;              /* un poco más de altura de línea */
+}
+
+.result-title .result-highlight {
+  display: block;                  /* baja a la línea de abajo */
+  margin-top: 0.25rem;             /* separa del "Tu estilo de..." */
+}

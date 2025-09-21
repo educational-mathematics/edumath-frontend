@@ -60,16 +60,30 @@ export class Settings {
 
   confirmUnlock() {
     if (this.unlockForm.invalid) return;
-    // No validamos en backend aquí; el backend valida en changePassword.
     const current = this.unlockForm.value.current!;
-    this.unlockModalOpen = false;
-    this.locked = false;
 
-    // habilitar campos y cargar la actual en el form principal
-    this.securityForm.controls.current.enable();
-    this.securityForm.controls.password.enable();
-    this.securityForm.controls.repeat.enable();
-    this.securityForm.controls.current.setValue(current);
+    this.loading = true; this.err = ''; this.msg = '';
+    this.auth.checkPassword(current).subscribe({
+      next: () => {
+        this.loading = false;
+        // ok → desbloquear
+        this.unlockModalOpen = false;
+        this.locked = false;
+
+        this.securityForm.controls.current.enable();
+        this.securityForm.controls.password.enable();
+        this.securityForm.controls.repeat.enable();
+        this.securityForm.controls.current.setValue(current);
+      },
+      error: (e) => {
+        this.loading = false;
+        // Mantén el overlay abierto y muestra error
+        this.err = e?.error?.detail ?? 'Contraseña actual incorrecta';
+
+        //hacerlo desaparecer tras 3s
+        setTimeout(() => { this.err = ''; }, 3000);
+      }
+    });
   }
 
   // Re-bloquear manualmente

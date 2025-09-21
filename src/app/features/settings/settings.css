@@ -223,3 +223,20 @@ form.locked button[disabled] {
   opacity: 0.9;
   box-shadow: none;
 }
+
+.toast-error-overlay {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2001;           /* > overlay (que tiene 1000) */
+  background: #ffebee;
+  color: #b71c1c;
+  border: 1px solid #ffcdd2;
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 10px 26px rgba(183, 28, 28, 0.18);
+  font-size: 14px;
+  max-width: 90vw;
+  text-align: center;
+}

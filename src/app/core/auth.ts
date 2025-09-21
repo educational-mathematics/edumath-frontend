@@ -19,6 +19,51 @@ export class Auth {
   private tokenKey = 'token';
   private userKey = 'user';
 
+  /** Valida exp del JWT en el storage (sin llamar al backend). */
+  private isTokenValid(): boolean {
+    const t = localStorage.getItem(this.tokenKey);
+    if (!t) return false;
+    try {
+      const [, payloadB64] = t.split('.');
+      const json = atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/'));
+      const payload = JSON.parse(json);
+      const expMs = (payload.exp ?? 0) * 1000;
+      return Date.now() < expMs;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Rehidrata sesión al arrancar la app:
+   * - Si el token es inválido, limpia storage.
+   * - Si el token es válido y no hay user, hace GET /users/me y lo guarda.
+   * Devuelve Promise<void> porque se usa en provideAppInitializer.
+   */
+  rehydrateSession(): Promise<void> {
+    if (!this.isTokenValid()) {
+      localStorage.removeItem(this.tokenKey);
+      localStorage.removeItem(this.userKey);
+      return Promise.resolve();
+    }
+    if (localStorage.getItem(this.userKey)) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      this.me()
+        .pipe(
+          tap(u => localStorage.setItem(this.userKey, JSON.stringify(u))),
+          catchError(() => {
+            localStorage.removeItem(this.tokenKey);
+            localStorage.removeItem(this.userKey);
+            return of(null);
+          })
+        )
+        .subscribe(() => resolve());
+    });
+  }
+
   /** LOGIN: envía form-urlencoded con username (email) y password */
   login(data: LoginRequest): Observable<User | null> {
     return this.api

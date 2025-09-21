@@ -4,30 +4,39 @@ import { Navbar } from '../../shared/components/navbar/navbar';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { Auth } from '../../core/auth';
 import { Router } from '@angular/router';
+import { Theme } from '../../core/theme';
 
 @Component({
   selector: 'app-settings',
   imports: [Navbar, ReactiveFormsModule, CommonModule, FormsModule],
   templateUrl: './settings.html',
-  styleUrls: ['./settings.css'] // <- usa plural
+  styleUrls: ['./settings.css']
 })
 export class Settings {
   private fb = inject(FormBuilder);
   private auth = inject(Auth);
   private router = inject(Router);
+  private theme = inject(Theme);
 
   tab: 'seguridad' | 'preferencias' = 'seguridad';
-  msg = '';
-  err = '';
-  loading = false;
+  msg = ''; err = ''; loading = false;
+
+  // Estado de bloqueo y modal de desbloqueo
+  locked = true;
+  unlockModalOpen = false;
 
   me = this.auth.getCurrentUser();
 
-  // Seguridad
+  // Form principal de seguridad
   securityForm = this.fb.group({
+    current: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(6)]],
+    password: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(6)]],
+    repeat:   [{ value: '', disabled: true }, [Validators.required, Validators.minLength(6)]],
+  });
+
+  // Form del overlay (solo pide la actual)
+  unlockForm = this.fb.group({
     current: ['', [Validators.required, Validators.minLength(6)]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    repeat:   ['', [Validators.required, Validators.minLength(6)]],
   });
 
   // Preferencias (solo front)
@@ -38,22 +47,60 @@ export class Settings {
   setTab(t: typeof this.tab) { this.tab = t; this.clearMsgs(); }
   clearMsgs() { this.msg = ''; this.err = ''; }
 
-  // ----- Seguridad -----
+  // ---------- Desbloqueo con overlay ----------
+  openUnlock() {
+    this.clearMsgs();
+    this.unlockForm.reset();
+    this.unlockModalOpen = true;
+  }
+
+  cancelUnlock() {
+    this.unlockModalOpen = false;
+  }
+
+  confirmUnlock() {
+    if (this.unlockForm.invalid) return;
+    // No validamos en backend aquí; el backend valida en changePassword.
+    const current = this.unlockForm.value.current!;
+    this.unlockModalOpen = false;
+    this.locked = false;
+
+    // habilitar campos y cargar la actual en el form principal
+    this.securityForm.controls.current.enable();
+    this.securityForm.controls.password.enable();
+    this.securityForm.controls.repeat.enable();
+    this.securityForm.controls.current.setValue(current);
+  }
+
+  // Re-bloquear manualmente
+  relock() {
+    this.locked = true;
+    this.securityForm.controls.current.disable();
+    this.securityForm.controls.password.disable();
+    this.securityForm.controls.repeat.disable();
+    this.securityForm.reset({
+      current: '',
+      password: '',
+      repeat: ''
+    });
+    this.clearMsgs();
+  }
+
+  // ---------- Cambiar contraseña ----------
   changePassword() {
+    if (this.locked) return;
     if (this.securityForm.invalid) return;
 
-    const { current, password, repeat } = this.securityForm.value;
-    if (password !== repeat) {
-      this.err = 'Las contraseñas no coinciden.';
-      return;
-    }
+    const { current, password, repeat } = this.securityForm.getRawValue();
+    if (password !== repeat) { this.err = 'Las contraseñas no coinciden.'; return; }
 
     this.loading = true; this.clearMsgs();
     this.auth.changePassword(current!, password!).subscribe({
       next: () => {
         this.loading = false;
         this.msg = 'Contraseña actualizada.';
-        this.securityForm.reset();
+        // Re-bloquear automáticamente
+        this.relock();
       },
       error: (e) => {
         this.loading = false;
@@ -62,9 +109,10 @@ export class Settings {
     });
   }
 
-  // ----- Preferencias -----
+  // ---------- Preferencias ----------
   savePrefs() {
     localStorage.setItem('pref_theme', this.prefs.theme);
+    this.theme.setTheme(this.prefs.theme); // aplica global
     this.msg = 'Preferencias guardadas.';
   }
 }

@@ -1,4 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* Tema claro / oscuro básico */
+html.theme-light, :root.theme-light {
+    --bg: #f6f9ff;
+    --text: #0c1425;
+    --card: #ffffff;
+}
+
+html.theme-dark, :root.theme-dark {
+    --bg: #0b1220;
+    --text: #e6eaf2;
+    --card: #121a2b;
+}
+
+/* Aplica a body y tarjetas genéricas */
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.card, .mat-card, .login-card, .register-card {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border-color: rgba(255,255,255,0.08);
+}
+
+/* Inputs */
+input, select, textarea {
+    background: var(--card);
+    color: var(--text);
+}

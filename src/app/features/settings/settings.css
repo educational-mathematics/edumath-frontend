@@ -3,8 +3,8 @@
   display: grid;
   place-items: start center;
   padding: 24px;
-  min-height: calc(100vh - 64px); /* deja espacio para el navbar */
-  background: linear-gradient(180deg, #f6f9ff 0%, #eef3fb 100%);
+  /*height: 79%;  deja espacio para el navbar 
+  background: linear-gradient(180deg, #f6f9ff 0%, #eef3fb 100%);*/
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
@@ -101,6 +101,7 @@
 .field {
   display: grid;
   gap: 6px;
+  margin-bottom: 15px;
 }
 label {
   font-size: 14px;
@@ -146,4 +147,79 @@ input:focus, select:focus {
   background: #b9c7de;
   box-shadow: none;
   cursor: not-allowed;
+}
+
+.lock-actions { display: flex; gap: 10px; margin: 6px 0 10px; }
+
+.primary.outline {
+  background: transparent;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  box-shadow: none;
+}
+.primary.outline:hover { background: rgba(25,118,210,0.06); }
+
+/* Overlay sencillo */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(13, 18, 30, 0.55);
+  display: grid; place-items: center;
+  z-index: 1000;
+}
+.overlay-card {
+  width: min(420px, 92vw);
+  background: var(--card, #fff);
+  color: var(--text, #0c1425);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.overlay-card h3 { margin: 0 0 8px; }
+.overlay-actions { display: flex; gap: 10px; justify-content: end; margin-top: 8px; }
+.ghost {
+  background: transparent; color: #234; border: 1px solid #cfd7e7;
+  padding: 8px 12px; border-radius: 10px; cursor: pointer;
+}
+.ghost:hover { background: #f3f6fc; }
+
+/* Estado bloqueado del formulario de seguridad */
+form.locked {
+  position: relative;
+  filter: grayscale(18%);
+  opacity: 0.6;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE/Edge legacy */
+  user-select: none;
+}
+
+/* Velo sutil encima del form bloqueado */
+form.locked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(240, 244, 255, 0.45) 0%,
+    rgba(232, 238, 252, 0.55) 100%
+  );
+  pointer-events: none; /* permite scroll si el form es alto */
+}
+
+/* Inputs deshabilitados: look coherente */
+form.locked input[disabled],
+form.locked select[disabled],
+form.locked textarea[disabled] {
+  background: #f3f6fc;
+  color: #6b778c;
+  border-color: #dbe4f3;
+}
+
+/* Botón deshabilitado (ya lo deshabilitas por lógica) */
+form.locked button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.9;
+  box-shadow: none;
 }

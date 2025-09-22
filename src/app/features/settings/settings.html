@@ -13,108 +13,100 @@
 
     @if (msg) { <div class="alert success">{{ msg }}</div> }
 
-    @if (tab === 'seguridad') {
-      <div class="section">
-        <div class="info-row">
-          <span class="label">Correo</span>
-          <span class="value">{{ me?.email }}</span>
-        </div>
+    <!-- 👇 stream del usuario -->
+    @if (me$ | async; as me) {
 
-        <!-- Controles de bloqueo -->
-        <div class="lock-actions">
-          @if (locked) {
-            <button type="button" class="primary" (click)="openUnlock()">
-              Desbloquear cambio de contraseña
-            </button>
-          } @else {
-            <button type="button" class="primary outline" (click)="relock()">
-              Cancelar y bloquear
-            </button>
-          }
-        </div>
+      @if (tab === 'seguridad') {
+        <div class="section">
+          <div class="info-row">
+            <span class="label">Correo</span>
+            <span class="value">{{ me?.email }}</span>
+          </div>
 
-        <form [formGroup]="securityForm" (ngSubmit)="changePassword()" novalidate [class.locked]="locked">
-         <!---<div class="field">
-            <label for="current">Contraseña actual</label>
-            <input id="current" type="password" formControlName="current" placeholder="••••••••" [disabled]="locked"/>
-            @if (securityForm.controls.current.touched && securityForm.controls.current.invalid) {
-              <small class="hint">Mínimo 6 caracteres.</small>
-            }
-          </div> -->
-
-          <div class="field">
-            <label for="password">Nueva contraseña</label>
-            <input id="password" type="password" formControlName="password" placeholder="••••••••" [disabled]="locked"/>
-            @if (!locked && securityForm.controls.password.touched && securityForm.controls.password.invalid) {
-              <small class="hint">Mínimo 6 caracteres.</small>
+          <div class="lock-actions">
+            @if (locked) {
+              <button type="button" class="primary" (click)="openUnlock()">Desbloquear cambio de contraseña</button>
+            } @else {
+              <button type="button" class="primary outline" (click)="relock()">Cancelar y bloquear</button>
             }
           </div>
 
-          <div class="field">
-            <label for="repeat">Repetir nueva contraseña</label>
-            <input id="repeat" type="password" formControlName="repeat" placeholder="••••••••" [disabled]="locked"/>
-            @if (!locked && securityForm.controls.repeat.touched && securityForm.controls.repeat.invalid) {
-              <small class="hint">Mínimo 6 caracteres.</small>
-            }
-          </div>
-
-          @if (!locked && securityForm.value.password && securityForm.value.repeat && (securityForm.value.password !== securityForm.value.repeat)) {
-            <div class="inline-error">Las contraseñas no coinciden.</div>
-          }
-
-          <button class="primary"
-                  type="submit"
-                  [disabled]="locked || securityForm.invalid || loading || (securityForm.value.password !== securityForm.value.repeat)">
-            {{ loading ? 'Actualizando...' : 'Actualizar contraseña' }}
-          </button>
-        </form>
-      </div>
-    }
-
-    @if (tab === 'preferencias') {
-      <div class="section">
-        <div class="field">
-          <label for="theme">Tema</label>
-          <select id="theme" [(ngModel)]="prefs.theme">
-            <option value="light">Claro</option>
-            <option value="dark">Oscuro</option>
-          </select>
-          <small class="hint">El tema se aplica a toda la web y se guarda en tu navegador.</small>
-        </div>
-
-        <button class="primary" (click)="savePrefs()">Guardar preferencias</button>
-      </div>
-    }
-
-    <!-- Overlay de desbloqueo -->
-    @if (unlockModalOpen) {
-      <div class="overlay">
-        <div class="overlay-card">
-          <h3>Confirmar identidad</h3>
-          <p>Ingresa tu <strong>contraseña actual</strong> para desbloquear el cambio.</p>
-
-          @if (err && unlockModalOpen) {
-            <div class="toast-error-overlay">{{ err }}</div>
-          }
-
-          <form [formGroup]="unlockForm" (ngSubmit)="confirmUnlock()" novalidate>
+          <form [formGroup]="securityForm"
+                (ngSubmit)="changePassword()"
+                novalidate
+                [class.locked]="locked">
             <div class="field">
-              <label for="unlock-current">Contraseña actual</label>
-              <input id="unlock-current" type="password" formControlName="current" placeholder="••••••••" autofocus />
-              @if (unlockForm.controls.current.touched && unlockForm.controls.current.invalid) {
+              <label for="password">Nueva contraseña</label>
+              <input id="password" type="password" formControlName="password" placeholder="••••••••" [disabled]="locked"/>
+              @if (!locked && securityForm.controls.password.touched && securityForm.controls.password.invalid) {
                 <small class="hint">Mínimo 6 caracteres.</small>
               }
             </div>
 
-
-
-            <div class="overlay-actions">
-              <button type="button" class="ghost" (click)="cancelUnlock()">Cancelar</button>
-              <button type="submit" class="primary" [disabled]="unlockForm.invalid || loading">{{ loading ? 'Verificando...' : 'Desbloquear' }}</button>
+            <div class="field">
+              <label for="repeat">Repetir nueva contraseña</label>
+              <input id="repeat" type="password" formControlName="repeat" placeholder="••••••••" [disabled]="locked"/>
+              @if (!locked && securityForm.controls.repeat.touched && securityForm.controls.repeat.invalid) {
+                <small class="hint">Mínimo 6 caracteres.</small>
+              }
             </div>
+
+            @if (!locked && securityForm.value.password && securityForm.value.repeat && (securityForm.value.password !== securityForm.value.repeat)) {
+              <div class="inline-error">Las contraseñas no coinciden.</div>
+            }
+
+            <button class="primary"
+                    type="submit"
+                    [disabled]="locked || securityForm.invalid || loading || (securityForm.value.password !== securityForm.value.repeat)">
+              {{ loading ? 'Actualizando...' : 'Actualizar contraseña' }}
+            </button>
           </form>
         </div>
-      </div>
+      }
+
+      @if (tab === 'preferencias') {
+        <div class="section">
+          <div class="field">
+            <label for="theme">Tema</label>
+            <select id="theme" [(ngModel)]="prefs.theme">
+              <option value="light">Claro</option>
+              <option value="dark">Oscuro</option>
+            </select>
+            <small class="hint">El tema se aplica a toda la web y se guarda en tu navegador.</small>
+          </div>
+          <button class="primary" (click)="savePrefs()">Guardar preferencias</button>
+        </div>
+      }
+
+      <!-- Overlay de desbloqueo -->
+      @if (unlockModalOpen) {
+        <div class="overlay">
+          <div class="overlay-card">
+            <h3>Confirmar identidad</h3>
+            <p>Ingresa tu <strong>contraseña actual</strong> para desbloquear el cambio.</p>
+
+            <!-- mensaje de error visible sobre el modal -->
+            @if (err) { <div class="alert error" style="margin-bottom:10px">{{ err }}</div> }
+
+            <form [formGroup]="unlockForm" (ngSubmit)="confirmUnlock()" novalidate>
+              <div class="field">
+                <label for="unlock-current">Contraseña actual</label>
+                <input id="unlock-current" type="password" formControlName="current" placeholder="••••••••" autofocus />
+                @if (unlockForm.controls.current.touched && unlockForm.controls.current.invalid) {
+                  <small class="hint">Mínimo 6 caracteres.</small>
+                }
+              </div>
+
+              <div class="overlay-actions">
+                <button type="button" class="ghost" (click)="cancelUnlock()">Cancelar</button>
+                <button type="submit" class="primary" [disabled]="unlockForm.invalid || loading">{{ loading ? 'Verificando...' : 'Desbloquear' }}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+    } @else {
+      <div class="section"><p class="hint">Cargando…</p></div>
     }
   </div>
 </div>

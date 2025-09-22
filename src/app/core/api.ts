@@ -27,11 +27,21 @@ export class Api {
   }
 
   // Para /auth/login con OAuth2PasswordRequestForm (x-www-form-urlencoded)
-  form<T>(path: string, form: Record<string, string>) {
-    const body = new URLSearchParams();
-    for (const [k, v] of Object.entries(form)) body.set(k, v);
-    return this.http.post<T>(`${this.base}${path}`, body.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  form<T>(path: string, body: Record<string, string>) {
+    const x = new URLSearchParams();
+    Object.entries(body).forEach(([k, v]) => x.append(k, v));
+    return this.http.post<T>(this.base + path, x.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
+  }
+
+  upload<T>(path: string, formData: FormData) { 
+    return this.http.post<T>(this.base + path, formData); 
+  }
+
+  absolute(url?: string): string | undefined {
+    if (!url) return undefined;
+    if (/^https?:\/\//i.test(url)) return url;
+    return this.base.replace(/\/$/, '') + url; // pega el base del Api
   }
 }

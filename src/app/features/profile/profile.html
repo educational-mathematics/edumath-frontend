@@ -1,3 +1,136 @@
 <app-navbar></app-navbar>
+<div class="profile">
+  <h1>Mi Perfil</h1>
 
-<p>profile works!</p>
+  @if (msg) { <div class="alert ok">{{ msg }}</div> }
+  @if (err) { <div class="alert err">{{ err }}</div> }
+
+  @if (me$ | async; as me) {
+    <!-- ===== PERFIL ===== -->
+    <section class="card grid-2">
+      
+      <div class="left">
+        <div class="avatar-wrap">
+          <img [src]="avatarSrc(me)" alt="Foto de perfil" (error)="onImgError($event)">
+          <button class="btn small" (click)="pickFile()" aria-label="Cambiar foto de perfil">Cambiar foto</button>
+          <input #fileInput type="file" accept="image/*" (change)="onFileChange($event)" hidden>
+        </div>
+
+        <div class="points">
+          <div class="big">{{ me?.points ?? 0 }}</div>
+          <div class="label">Puntos</div>
+        </div>
+      </div>
+
+      <form class="right" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <label>Nombre
+          @if (!editingName) {
+            <button type="button" class="icon" (click)="startEditName()" title="Editar nombre" aria-label="Editar nombre">✎</button>
+          }
+        </label>
+
+        <div class="row-edit">
+          <input type="text" formControlName="name" [readonly]="!editingName" aria-label="Nombre">
+          @if (editingName) {
+            <div class="actions">
+              <button type="submit" [disabled]="profileForm.invalid || loading" class="ghost">{{ loading ? 'Guardando...' : 'Guardar' }}</button>
+              <button type="button" class="ghost" (click)="cancelEditName()">Cancelar</button>
+            </div>
+          }
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== INSIGNIAS ===== -->
+    <section class="card">
+      <h2>Insignias</h2>
+      @if (me?.badges?.length) {
+        <div class="badges">
+          @for (b of me!.badges!; track b) {
+            <div class="badge">{{ b }}</div>
+          }
+        </div>
+      } @else {
+        <p class="muted">Aún no tienes insignias. ¡Completa lecciones para conseguirlas!</p>
+      }
+    </section>
+
+    <!-- ===== RANKING ===== -->
+    <section class="card">
+      <h2>Ranking mundial</h2>
+
+      <!-- Alias -->
+      <form [formGroup]="aliasForm" (ngSubmit)="saveAlias()" class="alias-row">
+        <label>Alias
+          @if (!editingAlias) {
+            <button type="button" class="icon" (click)="startEditAlias()" title="Editar alias" aria-label="Editar alias">✎</button>
+          }
+        </label>
+
+        <div class="row-edit">
+          <input type="text" formControlName="alias" [readonly]="!editingAlias" placeholder="tu_alias_123" aria-label="Alias">
+          @if (editingAlias) {
+            <div class="actions">
+              <button type="submit" class ="ghost" [disabled]="aliasForm.invalid || loading">{{ loading ? 'Actualizando...' : (me?.alias ? 'Cambiar' : 'Crear') }}</button>
+              <button type="button" class="ghost" (click)="cancelEditAlias()">Cancelar</button>
+            </div>
+          }
+        </div>
+      </form>
+
+      <!-- Tabla ranking (TOP 100) -->
+      @if (me?.alias) {
+        @if (top100.length) {
+          <div class="ranking">
+            <div class="r-head">
+              <div>#</div><div>Alias</div><div>Puntos</div>
+            </div>
+
+            @for (row of top100; track row.alias) {
+              <div class="r-row"
+                    [class.top1]="row.rank === 1"
+                    [class.top2]="row.rank === 2"
+                    [class.top3]="row.rank === 3"
+                    [class.me]="row.alias === me.alias">
+
+                <div>{{ row.rank }}</div>
+
+                <div class="alias-cell">
+                  @if (row.rank === 1) { <span class="medal">🥇</span> }
+                  @if (row.rank === 2) { <span class="medal">🥈</span> }
+                  @if (row.rank === 3) { <span class="medal">🥉</span> }
+
+                  <img [src]="row.avatar_url || 'assets/avatar-placeholder.png'" [alt]="'Avatar de ' + row.alias">
+                  <span>{{ row.alias }}</span>
+                </div>
+
+                <div>{{ row.points }}</div>
+              </div>
+            }
+          </div>
+
+          <!-- Si mi posición NO está en el top 100 pero el backend me la devuelve -->
+          @if (myOutside && myOutside.rank > 100) {
+            <div class="my-rank-card">
+              <div>{{ myOutside.rank }}</div>
+              <div class="alias-cell">
+                <img [src]="myOutside.avatar_url || 'assets/avatar-placeholder.png'" alt="Tu avatar">
+                <span>{{ myOutside.alias }}</span>
+              </div>
+              <div>{{ myOutside.points }}</div>
+            </div>
+            <div class="my-rank-hint">
+              Mostrando el Top 100. Tu posición actual aparece abajo.
+            </div>
+          }
+        } @else {
+          <p class="muted">Cargando ranking…</p>
+        }
+      } @else {
+        <p class="muted">Crea un alias para aparecer y ver el ranking.</p>
+      }
+    </section>
+  } @else {
+    <p class="muted">Cargando perfil…</p>
+  }
+</div>

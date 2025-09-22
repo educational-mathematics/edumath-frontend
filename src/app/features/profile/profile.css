@@ -1,0 +1,259 @@
+/* ===== Layout base ===== */
+.profile {
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 0 16px;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-weight: 800;
+  color: #1e3a8a; /* azul oscuro */
+}
+
+/* ===== Card ===== */
+.card {
+  background: #fff;
+  border: 1px solid #e8eef8;
+  border-radius: 16px;
+  margin-bottom: 18px;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(25, 118, 210, 0.12);
+  overflow: hidden;
+}
+
+/* Encabezado “bonito” cuando el h2 está dentro de la card */
+.card > h2 {
+  margin: -16px -16px 12px -16px;         /* ocupa todo el ancho de la card */
+  padding: 16px 18px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: .2px;
+  background: linear-gradient(90deg, #1976d2 0%, #4f8bdc 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+/* ===== Grid principal (avatar + datos) ===== */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 18px;
+}
+@media (max-width: 880px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.left { display: grid; gap: 14px; justify-items: center; }
+
+/* Avatar + botón */
+.avatar-wrap { display: grid; gap: 12px; justify-items: center; }
+.avatar-wrap img {
+  width: 184px; height: 184px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f2f4f8;
+  border: 1px solid #e8eef8;
+  box-shadow: 0 10px 26px rgba(25, 118, 210, 0.15);
+}
+
+.btn,
+.btn.small {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: transform .06s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+}
+
+/* Botón principal (Cambiar foto / Guardar) */
+.btn.small, .right button {
+  background: #1976d2;
+  color: #fff;
+  padding: 10px 14px;
+  box-shadow: 0 6px 16px rgba(25, 118, 210, 0.22);
+}
+.btn.small:hover, .right button:hover { transform: translateY(-1px); }
+
+/* Botón ghost */
+.ghost {
+  background-color: #1976d2;
+  border: 1px solid #cfd7e7;
+  box-shadow: 0 6px 16px rgba(25, 118, 210, 0.22);
+  color: rgb(255, 255, 255);
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.ghost:hover { background: #f3f6fc; }
+
+/* Puntos */
+.points { text-align: center; }
+.points .big { font-size: 2rem; font-weight: 800; color: #0f172a; }
+.points .label { color: #5b6b7a; }
+
+/* ===== Lado derecho (form nombre) ===== */
+.right { display: grid; gap: 12px; }
+
+/* Label con botón editar a la derecha */
+.right label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 👈 el ícono de editar queda bien ubicado */
+  font-size: 14px;
+  color: #334;
+  font-weight: 700;
+}
+
+/* Ícono editar */
+.icon {
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid #e0e7f3;
+  background: #1976d2;
+  box-shadow: 0 6px 16px rgba(25, 118, 210, 0.22);
+  color: #f8fbff;
+  cursor: pointer;
+  transition: background .2s, transform .06s, box-shadow .2s, color .2s;
+}
+.icon:hover {
+  background: #ffffff;
+  color: #1e3a8a;
+  box-shadow: 0 4px 10px rgba(30, 58, 138, 0.15);
+  transform: translateY(-1px);
+}
+
+.row-edit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.right input {
+  padding: 10px 12px;
+  border: 1px solid #ccd6ea;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  background: #fff;
+}
+.right input[readonly] {
+  background: #f7faff;
+  color: #334;
+  border-color: #dbe4f3;
+}
+.right input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 4px rgba(25,118,210,0.10);
+}
+
+.actions { display: flex; gap: 8px; }
+
+/* ===== Alias ===== */
+.alias-row { display: grid; gap: 10px; }
+.alias-row label {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 14px; color: #334; font-weight: 700;
+}
+.alias-row input {
+  padding: 10px 12px; border: 1px solid #ccd6ea; border-radius: 12px; max-width: 360px;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.alias-row input[readonly] {
+  background: #f7faff; color: #334; border-color: #dbe4f3;
+}
+.alias-row input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 4px rgba(25,118,210,0.10);
+}
+
+/* ===== Badges ===== */
+.badges { display: flex; flex-wrap: wrap; gap: 10px; }
+.badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #223a7a;
+  border: 1px solid #d9e6ff;
+  font-weight: 700;
+}
+
+/* ===== Ranking ===== */
+.ranking { display: grid; gap: 6px; margin-top: 10px; }
+.r-head, .r-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid #e8eef8;
+  border-radius: 12px;
+  background: #ffffff;
+}
+.r-head {
+  background: #f8fbff;
+  font-weight: 800;
+  color: #274690;
+}
+.alias-cell { display: flex; align-items: center; gap: 10px; }
+.alias-cell img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+
+/* ===== Mensajes ===== */
+.muted { color: #6b7b8c; }
+.alert {
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid transparent;
+}
+.alert.ok    { background: #e8f5e9; color: #256029; border-color: #c8e6c9; }
+.alert.err   { background: #ffebee; color: #b71c1c; border-color: #ffcdd2; }
+
+/* ===== Top 3 estilos ===== */
+.r-row.top1 {
+  border: 2px solid #f59e0b; /* dorado */
+  background: linear-gradient(180deg, #fff7e6 0%, #fff1c7 100%);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.25);
+}
+.r-row.top2 {
+  border: 2px solid #9ca3af; /* plata */
+  background: linear-gradient(180deg, #f5f7fb 0%, #eef1f6 100%);
+  box-shadow: 0 6px 18px rgba(156, 163, 175, 0.25);
+}
+.r-row.top3 {
+  border: 2px solid #b45309; /* bronce */
+  background: linear-gradient(180deg, #fff3e9 0%, #ffe4d1 100%);
+  box-shadow: 0 6px 18px rgba(180, 83, 9, 0.22);
+}
+
+/* Medallas pequeñas en el alias */
+.alias-cell .medal {
+  font-size: 1rem;
+  margin-right: 6px;
+}
+
+/* ===== Resalte de mi fila ===== */
+.r-row.me {
+  outline: 2px solid #2563EB;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+}
+
+/* Tarjeta "Tu posición" cuando estás fuera del top 100 */
+.my-rank-card {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed #c7dbff;
+  background: #f8fbff;
+  display: grid;
+  grid-template-columns: 60px 1fr 100px;
+  gap: 10px;
+  align-items: center;
+}
+.my-rank-card .alias-cell { display: flex; align-items: center; gap: 10px; }
+.my-rank-card .alias-cell img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+.my-rank-hint { color: #5b6b7a; margin-top: 6px; }

@@ -2,7 +2,7 @@
 
 /* Tema claro / oscuro básico */
 html.theme-light, :root.theme-light {
-    --bg: #f6f9ff;
+    --bg: #f9f9f9;
     --text: #0c1425;
     --card: #ffffff;
 }

@@ -11,6 +11,10 @@ export interface User {
     testAnsweredBy?: 'alumno' | 'representante';
     testDate?: string; // ISO
 
+    points: number;
+    alias?: string;
+    badges?: string[];
+
     // El backend NUNCA devuelve password; si la usas en formularios, que sea opcional
     password?: string;
 }

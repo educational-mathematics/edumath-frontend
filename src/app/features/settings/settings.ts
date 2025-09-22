@@ -4,10 +4,10 @@ import { Navbar } from '../../shared/components/navbar/navbar';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { Auth } from '../../core/auth';
 import { Router } from '@angular/router';
-import { Theme } from '../../core/theme';
 
 @Component({
   selector: 'app-settings',
+  standalone: true,
   imports: [Navbar, ReactiveFormsModule, CommonModule, FormsModule],
   templateUrl: './settings.html',
   styleUrls: ['./settings.css']
@@ -16,25 +16,26 @@ export class Settings {
   private fb = inject(FormBuilder);
   private auth = inject(Auth);
   private router = inject(Router);
-  private theme = inject(Theme);
+
+  // ✅ stream del usuario (en lugar de snapshot)
+  me$ = this.auth.user$;
 
   tab: 'seguridad' | 'preferencias' = 'seguridad';
-  msg = ''; err = ''; loading = false;
+  msg = '';
+  err = '';
+  loading = false;
 
-  // Estado de bloqueo y modal de desbloqueo
+  // Seguridad
   locked = true;
   unlockModalOpen = false;
 
-  me = this.auth.getCurrentUser();
-
-  // Form principal de seguridad
   securityForm = this.fb.group({
-    current: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(6)]],
-    password: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(6)]],
-    repeat:   [{ value: '', disabled: true }, [Validators.required, Validators.minLength(6)]],
+    // current va en el modal, no en el form principal
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    repeat:   ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  // Form del overlay (solo pide la actual)
+  // Modal: contraseña actual para desbloquear
   unlockForm = this.fb.group({
     current: ['', [Validators.required, Validators.minLength(6)]],
   });
@@ -47,74 +48,44 @@ export class Settings {
   setTab(t: typeof this.tab) { this.tab = t; this.clearMsgs(); }
   clearMsgs() { this.msg = ''; this.err = ''; }
 
-  // ---------- Desbloqueo con overlay ----------
-  openUnlock() {
-    this.clearMsgs();
-    this.unlockForm.reset();
-    this.unlockModalOpen = true;
-  }
-
-  cancelUnlock() {
-    this.unlockModalOpen = false;
-  }
-
-  confirmUnlock() {
+  // ----- Desbloqueo -----
+  openUnlock() { this.unlockModalOpen = true; this.clearMsgs(); }
+  cancelUnlock() { this.unlockModalOpen = false; this.unlockForm.reset(); }
+  async confirmUnlock() {
     if (this.unlockForm.invalid) return;
-    const current = this.unlockForm.value.current!;
-
     this.loading = true; this.err = ''; this.msg = '';
-    this.auth.checkPassword(current).subscribe({
-      next: () => {
-        this.loading = false;
-        // ok → desbloquear
-        this.unlockModalOpen = false;
-        this.locked = false;
-
-        this.securityForm.controls.current.enable();
-        this.securityForm.controls.password.enable();
-        this.securityForm.controls.repeat.enable();
-        this.securityForm.controls.current.setValue(current);
-      },
-      error: (e) => {
-        this.loading = false;
-        // Mantén el overlay abierto y muestra error
-        this.err = e?.error?.detail ?? 'Contraseña actual incorrecta';
-
-        //hacerlo desaparecer tras 3s
-        setTimeout(() => { this.err = ''; }, 3000);
-      }
-    });
+    try {
+      // valida contra backend la contraseña actual (sin cambiarla aún)
+      await this.auth.checkPassword(this.unlockForm.value.current!).toPromise();
+      this.unlockModalOpen = false;
+      this.locked = false;
+    } catch (e: any) {
+      this.err = e?.error?.detail || 'Contraseña incorrecta.';
+    } finally {
+      this.loading = false;
+    }
   }
-
-  // Re-bloquear manualmente
   relock() {
     this.locked = true;
-    this.securityForm.controls.current.disable();
-    this.securityForm.controls.password.disable();
-    this.securityForm.controls.repeat.disable();
-    this.securityForm.reset({
-      current: '',
-      password: '',
-      repeat: ''
-    });
+    this.securityForm.reset();
     this.clearMsgs();
   }
 
-  // ---------- Cambiar contraseña ----------
+  // ----- Seguridad -----
   changePassword() {
-    if (this.locked) return;
     if (this.securityForm.invalid) return;
-
-    const { current, password, repeat } = this.securityForm.getRawValue();
+    const { password, repeat } = this.securityForm.value;
     if (password !== repeat) { this.err = 'Las contraseñas no coinciden.'; return; }
 
+    // usamos la contraseña actual ingresada en el modal
+    const current = this.unlockForm.value.current!;
     this.loading = true; this.clearMsgs();
-    this.auth.changePassword(current!, password!).subscribe({
+
+    this.auth.changePassword(current, password!).subscribe({
       next: () => {
         this.loading = false;
         this.msg = 'Contraseña actualizada.';
-        // Re-bloquear automáticamente
-        this.relock();
+        this.relock(); // vuelve a bloquear
       },
       error: (e) => {
         this.loading = false;
@@ -123,10 +94,11 @@ export class Settings {
     });
   }
 
-  // ---------- Preferencias ----------
+  // ----- Preferencias -----
   savePrefs() {
     localStorage.setItem('pref_theme', this.prefs.theme);
-    this.theme.setTheme(this.prefs.theme); // aplica global
+    // aplica tema global si tienes servicio Theme con .setTheme(...)
+    document.documentElement.dataset['theme'] = this.prefs.theme;
     this.msg = 'Preferencias guardadas.';
   }
 }

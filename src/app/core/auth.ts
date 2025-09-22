@@ -1,15 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { Api } from './api';
-import { Observable, of, map, switchMap, tap, catchError } from 'rxjs';
+import { Observable, of, map, switchMap, tap, catchError, BehaviorSubject, firstValueFrom  } from 'rxjs';
 import { User } from './models/user.model';
 import { LoginRequest } from './models/login.model';
 import { RegisterRequest } from './models/register.model';
+import { RankingRow } from './models/ranking.model';
 
 type Purpose = 'register' | 'reset_password';
 
 interface Token {
   access_token: string;
-  token_type: string; // "bearer"
+  token_type: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -17,151 +18,201 @@ export class Auth {
   private api = inject(Api);
 
   private tokenKey = 'token';
-  private userKey = 'user';
+  private userKey  = 'user';
 
-  /** Valida exp del JWT en el storage (sin llamar al backend). */
-  private isTokenValid(): boolean {
-    const t = localStorage.getItem(this.tokenKey);
+  private userSubject = new BehaviorSubject<User | null>(this.readUserFromSession());
+  user$ = this.userSubject.asObservable();
+
+  // ---------- Utils de storage ----------
+  private readUserFromSession(): User | null {
+    const raw = sessionStorage.getItem(this.userKey);
+    if (!raw) return null;
+    try {
+      const u = JSON.parse(raw);
+      // normaliza avatar relativo -> absoluto
+      if (u?.avatarUrl?.startsWith('/')) {
+        const base = (this as any).api?.['base'] || 'http://localhost:8000';
+        u.avatarUrl = base.replace(/\/$/, '') + u.avatarUrl;
+      }
+      return u as User;
+    } catch { return null; }
+  }
+
+  private readUserFromLocal(): User | null {
+    const raw = localStorage.getItem(this.userKey);
+    if (!raw) return null;
+    try {
+      const u = JSON.parse(raw);
+      if (u?.avatarUrl?.startsWith('/')) {
+        const base = (this as any).api?.['base'] || 'http://localhost:8000';
+        u.avatarUrl = base.replace(/\/$/, '') + u.avatarUrl;
+      }
+      return u as User;
+    } catch { return null; }
+  }
+
+  private isTokenValidStr(t?: string | null): boolean {
     if (!t) return false;
     try {
       const [, payloadB64] = t.split('.');
       const json = atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/'));
       const payload = JSON.parse(json);
-      const expMs = (payload.exp ?? 0) * 1000;
-      return Date.now() < expMs;
+      return Date.now() < (payload.exp ?? 0) * 1000;
+    } catch { return false; }
+  }
+
+  private setSession(user: User | null, token?: string | null) {
+    // sessionStorage (runtime)
+    if (user) sessionStorage.setItem(this.userKey, JSON.stringify(user));
+    else sessionStorage.removeItem(this.userKey);
+
+    if (token === null) sessionStorage.removeItem(this.tokenKey);
+    else if (token)     sessionStorage.setItem(this.tokenKey, token);
+
+    // localStorage (solo para rehidratar)
+    if (user) localStorage.setItem(this.userKey, JSON.stringify(user));
+    else localStorage.removeItem(this.userKey);
+
+    if (token === null) localStorage.removeItem(this.tokenKey);
+    else if (token)     localStorage.setItem(this.tokenKey, token);
+
+    this.userSubject.next(user);
+  }
+
+  // ---------- Rehidratación en arranque ----------
+  async rehydrateSession(): Promise<void> {
+    const sessionToken = sessionStorage.getItem(this.tokenKey);
+    if (this.isTokenValidStr(sessionToken)) {
+      // Ya hay sesión en pestaña → asegura emitir user actual
+      this.userSubject.next(this.readUserFromSession());
+      return;
+    }
+
+    // No hay sesión en pestaña. ¿Hay copia válida en localStorage?
+    const localToken = localStorage.getItem(this.tokenKey);
+    if (!this.isTokenValidStr(localToken)) {
+      // token inválido → limpia todo
+      this.setSession(null, null);
+      return;
+    }
+
+    // Copia token a session, intenta traer user desde local; si no, llama /me
+    const localUser = this.readUserFromLocal();
+    if (localUser) {
+      this.setSession(localUser, localToken!);
+      return;
+    }
+
+    // No hay user en local: pide al backend
+    try {
+      const u = await firstValueFrom(this.me()); // Observable<User> -> Promise<User>
+      this.setSession(u, localToken!);
     } catch {
-      return false;
+      this.setSession(null, null);
     }
   }
 
-  /**
-   * Rehidrata sesión al arrancar la app:
-   * - Si el token es inválido, limpia storage.
-   * - Si el token es válido y no hay user, hace GET /users/me y lo guarda.
-   * Devuelve Promise<void> porque se usa en provideAppInitializer.
-   */
-  rehydrateSession(): Promise<void> {
-    if (!this.isTokenValid()) {
-      localStorage.removeItem(this.tokenKey);
-      localStorage.removeItem(this.userKey);
-      return Promise.resolve();
-    }
-    if (localStorage.getItem(this.userKey)) {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve) => {
-      this.me()
-        .pipe(
-          tap(u => localStorage.setItem(this.userKey, JSON.stringify(u))),
-          catchError(() => {
-            localStorage.removeItem(this.tokenKey);
-            localStorage.removeItem(this.userKey);
-            return of(null);
-          })
-        )
-        .subscribe(() => resolve());
-    });
-  }
-
-  /** LOGIN: envía form-urlencoded con username (email) y password */
-  login(data: LoginRequest): Observable<User | null> {
+  // ---------- Auth flows ----------
+  login(data: LoginRequest) {
     return this.api
       .form<Token>('/auth/login', { username: data.email, password: data.password })
       .pipe(
-        tap(t => sessionStorage.setItem(this.tokenKey, t.access_token)),
+        tap(t => {
+          // ✅ token disponible para el interceptor ANTES de llamar a /users/me
+          sessionStorage.setItem(this.tokenKey, t.access_token);
+          localStorage.setItem(this.tokenKey, t.access_token); // copia para rehidratación
+        }),
         switchMap(() => this.me()),
         tap(u => {
-          if (u) sessionStorage.setItem(this.userKey, JSON.stringify(u));
+          // ✅ ya con el user, consolidamos session+local y emitimos por user$
+          const tok = sessionStorage.getItem(this.tokenKey);
+          this.setSession(u, tok);
         }),
         catchError(err => {
-          console.error('❌ Error login', err);
+          // limpieza defensiva si algo falla
+          sessionStorage.removeItem(this.tokenKey);
+          sessionStorage.removeItem(this.userKey);
+          localStorage.removeItem(this.tokenKey);
+          localStorage.removeItem(this.userKey);
+          console.error('❌ login', err);
           return of(null);
         })
       );
   }
 
-  /** REGISTER: el backend ya envía el código por correo */
+  logout() {
+    this.setSession(null, null);
+  }
+
+  // ---------- API helpers ----------
   register(data: RegisterRequest): Observable<User> {
-    // Puedes añadir más campos si luego decides (vakStyle, etc.)
     return this.api.post<any>('/auth/register', data).pipe(map(this.mapUserDto));
   }
 
-  /** Enviar código de verificación o de reset */
   sendCode(email: string, purpose: Purpose) {
     return this.api.post<{ message: string }>('/verification/send', { email, purpose });
   }
 
-  /** Verificar código; si es de registro, marca email_verified=True en backend */
   verifyCode(email: string, code: string, purpose: Purpose) {
     return this.api.post<{ message: string }>('/verification/verify', { email, code, purpose });
   }
 
-  /** Forgot / Reset password */
   forgot(email: string) {
     return this.api.post<{ message: string }>('/auth/forgot', { email });
   }
 
   reset(email: string, code: string, newPassword: string) {
     return this.api.post<{ message: string }>('/auth/reset', {
-      email,
-      code,
-      new_password: newPassword,
+      email, code, new_password: newPassword,
     });
   }
 
-  /** Usuario actual (requiere token) */
-  me(): Observable<User> {
+  me() {
     return this.api.get<any>('/users/me').pipe(map(this.mapUserDto));
   }
 
-  /** Storage helpers */
   getCurrentUser(): User | null {
-    const raw = sessionStorage.getItem(this.userKey);
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw) as User;
-    } catch {
-      return null;
-    }
+    return this.userSubject.value;
   }
 
-  logout() {
-    sessionStorage.removeItem(this.tokenKey);
-    sessionStorage.removeItem(this.userKey);
-  }
-
-  /** Mapea snake_case del backend a camelCase del front */
-  private mapUserDto = (dto: any): User => ({
-    id: dto.id,
-    email: dto.email,
-    name: dto.name,
-    firstLoginDone: dto.first_login_done ?? false,
-    emailVerified: dto.email_verified ?? false,
-    avatarUrl: dto.avatar_url ?? undefined,
-    vakStyle: dto.vak_style ?? undefined,
-    vakScores: dto.vak_scores ?? undefined,
-    testAnsweredBy: dto.test_answered_by ?? undefined,
-    testDate: dto.test_date ?? undefined,
-  });
-
-   /** Actualiza datos del usuario actual (requiere token). */
-  updateUser(partial: Partial<User>): Observable<User> {
-    // mapeamos camelCase -> snake_case para el backend
-    const payload: any = {};
-    if (partial.name !== undefined) payload.name = partial.name;
-    if (partial.firstLoginDone !== undefined) payload.first_login_done = partial.firstLoginDone;
-    if (partial.vakStyle !== undefined) payload.vak_style = partial.vakStyle;
-    if (partial.vakScores !== undefined) payload.vak_scores = partial.vakScores;
-    if (partial.testAnsweredBy !== undefined) payload.test_answered_by = partial.testAnsweredBy;
-    if (partial.testDate !== undefined) payload.test_date = partial.testDate;
-    if (partial.avatarUrl !== undefined) payload.avatar_url = partial.avatarUrl;
-
-    return this.api.put<any>('/users/me', payload).pipe(
+  updateUser(partial: Partial<User>) {
+    return this.api.put<any>('/users/me', this.mapUserToDto(partial)).pipe(
       map(this.mapUserDto),
-      tap(u => sessionStorage.setItem(this.userKey, JSON.stringify(u)))
+      tap(u => this.setSession(u, sessionStorage.getItem(this.tokenKey)))
     );
   }
+
+  uploadAvatar(file: File) {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.api.upload<any>('/users/me/avatar', fd).pipe(
+      map(this.mapUserDto),
+      map(u => {
+        if (u.avatarUrl) {
+          const sep = u.avatarUrl.includes('?') ? '&' : '?';
+          u.avatarUrl = `${u.avatarUrl}${sep}v=${Date.now()}`;
+        }
+        return u;
+      }),
+      tap(u => this.setSession(u, sessionStorage.getItem(this.tokenKey)))
+    );
+  }
+
+  setAlias(alias: string) {
+    return this.api.post<User>('/users/me/alias', { alias }).pipe(
+      map(this.mapUserDto),
+      tap(u => this.setSession(u, sessionStorage.getItem(this.tokenKey)))
+    );
+  }
+
+  getRanking() {
+    return this.api.get<RankingRow[]>('/ranking'); // Top 100
+  }
+
+  getMyRank() {
+    return this.api.get<RankingRow>('/ranking/me'); // tu fila (aunque estés fuera del top100)
+  }
+
 
   changePassword(currentPassword: string, newPassword: string) {
     return this.api.post<{ message: string }>('/auth/change-password', {
@@ -174,5 +225,50 @@ export class Auth {
     return this.api.post<{ ok: boolean }>('/auth/check-password', {
       current_password: currentPassword,
     });
-  } 
+  }
+
+  // ---------- Mappers ----------
+  private mapUserDto = (dto: any): User => ({
+    id: dto.id,
+    email: dto.email,
+    name: dto.name,
+    firstLoginDone: dto.first_login_done ?? false,
+    emailVerified: dto.email_verified ?? false,
+    avatarUrl: this.api.absolute(dto.avatar_url),
+    vakStyle: dto.vak_style ?? undefined,
+    vakScores: dto.vak_scores ?? undefined,
+    testAnsweredBy: dto.test_answered_by ?? undefined,
+    testDate: dto.test_date ?? undefined,
+    points: dto.points ?? 0,
+    alias: dto.alias ?? undefined,
+    badges: dto.badges ?? undefined,
+  });
+
+  private mapUserToDto(p: Partial<User>) {
+    const dto: any = {};
+    if (p.name !== undefined) dto.name = p.name;
+    if (p.firstLoginDone !== undefined) dto.first_login_done = p.firstLoginDone;
+    if (p.vakStyle !== undefined) dto.vak_style = p.vakStyle;
+    if (p.vakScores !== undefined) dto.vak_scores = p.vakScores;
+    if (p.testAnsweredBy !== undefined) dto.test_answered_by = p.testAnsweredBy;
+    if (p.testDate !== undefined) dto.test_date = p.testDate;
+    if (p.avatarUrl !== undefined) dto.avatar_url = p.avatarUrl;
+    return dto;
+  }
+
+  private setUser(u: User | null) {
+    if (u) {
+      localStorage.setItem('user', JSON.stringify(u));
+    } else {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    }
+    this.userSubject.next(u);
+  }
+
+  refreshMe() {
+    return this.me().pipe(
+      tap(u => this.setUser(u)) // actualiza user$ y storage
+    );
+  }
 }

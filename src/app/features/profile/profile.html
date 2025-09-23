@@ -28,7 +28,7 @@
             <button type="button" class="icon" (click)="startEditName()" title="Editar nombre" aria-label="Editar nombre">✎</button>
           }
         </label>
-
+        
         <div class="row-edit">
           <input type="text" formControlName="name" [readonly]="!editingName" aria-label="Nombre">
           @if (editingName) {
@@ -38,13 +38,20 @@
             </div>
           }
         </div>
+
+        @if (me?.vakStyle) {
+          <p class="vak">
+            Estilo de aprendizaje: 
+            <strong>{{ me.vakStyle | titlecase }}</strong>
+          </p>
+        }
       </form>
     </section>
 
     <!-- ===== INSIGNIAS ===== -->
     <section class="card">
       <h2>Insignias</h2>
-      @if (me?.badges?.length) {
+      <!--@if (me?.badges?.length) {
         <div class="badges">
           @for (b of me!.badges!; track b) {
             <div class="badge">{{ b }}</div>
@@ -52,7 +59,8 @@
         </div>
       } @else {
         <p class="muted">Aún no tienes insignias. ¡Completa lecciones para conseguirlas!</p>
-      }
+      }-->
+      <app-badges-panel></app-badges-panel>
     </section>
 
     <!-- ===== RANKING ===== -->

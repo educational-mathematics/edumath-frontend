@@ -1,0 +1,21 @@
+<section class="badges">
+  <div class="header">
+    <h3>Insignias</h3>
+    <button type="button" class="link" (click)="toggleShowAll()">
+      {{ showAll() ? 'Ver menos' : 'Ver más' }}
+    </button>
+  </div>
+
+  <div class="grid">
+    @for (b of visibleBadges(); track b.id) {
+      <button class="badge" (click)="open(b)" [class.locked]="!b.owned" [attr.aria-label]="b.title">
+        <img [src]="b.imageUrl" [alt]="" (error)="onImgErr($event)">
+        <div class="title">{{ b.title }}</div>
+      </button>
+    }
+  </div>
+
+  @if (badges().length === 0) {
+    <p class="empty">Cargando insignias…</p>
+  }
+</section>

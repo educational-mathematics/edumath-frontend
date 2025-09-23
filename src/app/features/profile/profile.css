@@ -86,7 +86,7 @@ h1 {
   border-radius: 12px;
   cursor: pointer;
 }
-.ghost:hover { background: #f3f6fc; }
+.ghost:hover { transform: translateY(-1px); }
 
 /* Puntos */
 .points { text-align: center; }
@@ -100,7 +100,7 @@ h1 {
 .right label {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 👈 el ícono de editar queda bien ubicado */
+  justify-content: space-between;
   font-size: 14px;
   color: #334;
   font-weight: 700;
@@ -119,8 +119,6 @@ h1 {
   transition: background .2s, transform .06s, box-shadow .2s, color .2s;
 }
 .icon:hover {
-  background: #ffffff;
-  color: #1e3a8a;
   box-shadow: 0 4px 10px rgba(30, 58, 138, 0.15);
   transform: translateY(-1px);
 }
@@ -257,3 +255,15 @@ h1 {
 .my-rank-card .alias-cell { display: flex; align-items: center; gap: 10px; }
 .my-rank-card .alias-cell img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
 .my-rank-hint { color: #5b6b7a; margin-top: 6px; }
+
+.vak {
+  font-size: 14px;
+  color: #334;
+  font-weight: 700;
+  margin: 4px 0 10px;
+}
+
+.vak strong {
+  color: #1976d2;
+  font-weight: 700;
+}

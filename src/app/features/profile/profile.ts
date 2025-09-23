@@ -5,11 +5,13 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { Auth } from '../../core/auth';
 import { Navbar } from '../../shared/components/navbar/navbar';
 import { RankingRow } from '../../core/models/ranking.model'; // 👈 crea este interface { rank, alias, points, avatar_url? }
+import { BadgesPanel } from '../badges/badges-panel/badges-panel';
+import { Toast } from '../../core/toast';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [Navbar, CommonModule, ReactiveFormsModule],
+  imports: [Navbar, CommonModule, ReactiveFormsModule, BadgesPanel],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
@@ -22,6 +24,9 @@ export class Profile implements OnInit, OnDestroy {
   private sub?: Subscription;
   private lastAlias: string | undefined;
   private lastName: string | undefined;
+
+  private toast = inject(Toast);
+  private shownKingToast = false; // evita repetir el toast en esta sesión de la vista
 
   msg = ''; err = ''; loading = false;
 
@@ -198,16 +203,50 @@ export class Profile implements OnInit, OnDestroy {
         this.ranking = rows || [];
         this.top100 = this.ranking.slice(0, 100);
 
+        // ¿Estoy en el Top 100?
         const inTop = myAlias ? this.top100.find(r => r.alias === myAlias) : null;
-        if (inTop) { this.myOutside = null; return; }
 
-        if (!myAlias) { this.myOutside = null; return; }
+        if (inTop) {
+          // no muestres “fuera del top”
+          this.myOutside = null;
 
-        // usa el endpoint real /ranking/me
+          // 👑 Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
+          if (!this.shownKingToast && inTop.rank === 1 && (inTop.points ?? 0) > 1000) {
+            this.toast.success('¡Insignia obtenida: El Rey!', {
+              message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
+              imageUrl: '/static/badges/king.png',
+              timeoutMs: 3000,
+            });
+            this.shownKingToast = true;
+
+            // refresca user para que las insignias queden actualizadas en Auth (silencioso)
+            this.auth.refreshMe().subscribe({ error: () => {} });
+          }
+          return;
+        }
+
+        // Si no hay alias, limpia y sal
+        if (!myAlias) {
+          this.myOutside = null;
+          return;
+        }
+
+        // Fuera del Top 100: consulta tu fila real
         this.auth.getMyRank().subscribe({
           next: (meRow) => {
             if (meRow && meRow.rank && meRow.rank > 100) this.myOutside = meRow;
             else this.myOutside = null;
+
+            // Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
+            if (!this.shownKingToast && meRow && meRow.rank === 1 && (meRow.points ?? 0) > 1000) {
+              this.toast.success('¡Insignia obtenida: El Rey!', {
+                message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
+                imageUrl: 'assets/king.png',
+                timeoutMs: 3000,
+              });
+              this.shownKingToast = true;
+              this.auth.refreshMe().subscribe({ error: () => {} });
+            }
           },
           error: () => { this.myOutside = null; }
         });

@@ -1,0 +1,113 @@
+/* Backdrop con blur y desvanecido */
+.wrap {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, .35);
+  backdrop-filter: blur(2px);
+  animation: fadeIn .16s ease-out;
+}
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+/* Tarjeta principal */
+.card {
+  position: relative;
+  width: min(720px, 92vw);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.30);
+  background:
+    radial-gradient(1200px 400px at 80% -10%, rgba(255,255,255,.7), transparent 60%),
+    linear-gradient(180deg, #0f172a, #111827);
+  color: #f8fafc;
+  border: 1px solid rgba(255,255,255,.08);
+  transform: translateY(8px) scale(.98);
+  animation: popIn .18s ease-out forwards;
+}
+
+@keyframes popIn {
+  to { transform: translateY(0) scale(1) }
+}
+
+/* Botón cerrar */
+.close {
+  position: absolute; top: 10px; right: 12px;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: none; cursor: pointer;
+  border-radius: 10px;
+  background: rgba(255,255,255,.08);
+  color: #000000; font-size: 20px; line-height: 1;
+}
+.close:hover { background: rgba(255,255,255,.15) }
+
+/* Hero: imagen grande centrada, mantiene proporción */
+.hero {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+  display: flex;
+  justify-content: center;  
+  align-items: center;  
+  padding: 18px 0;
+}
+
+.hero img {
+  display: block;
+  max-width: 100%;     
+  width: min(420px, 90%);   
+  max-height: 48vh;
+  margin: 0 auto;       
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+/* Texto y chips */
+.content {
+  padding: 18px clamp(18px, 4vw, 26px) 24px;
+}
+.title {
+  margin: 4px 0 8px;
+  font-size: clamp(1.15rem, 1.4vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: #1e3a8a;
+}
+.desc {
+  margin: 0 0 14px;
+  color: #000000;
+  line-height: 1.4;
+}
+
+/* Chips */
+.chips {
+  display: flex; flex-wrap: wrap;
+  gap: 10px;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: .92rem; font-weight: 600;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.08);
+  color: #e5e7eb;
+}
+.chip .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset;
+}
+
+/* Colores de estado */
+.chip.rarity { color: #60aaff }        /* azul claro */
+.chip.state.ok { color: #18c859 }      /* verde */
+.chip.state.ko { color: #d02929 }      /* rojo suave */
+
+/* Responsive pequeños */
+@media (max-width: 420px) {
+  .close { top: 8px; right: 8px }
+  .hero img { width: 86% }
+}

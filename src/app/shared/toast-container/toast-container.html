@@ -1,0 +1,16 @@
+<div class="toast-wrap" aria-live="polite" aria-atomic="true">
+  @for (t of toasts(); track t.id) {
+    <div class="toast" [classList]="kindClass(t.kind)" role="status">
+      <button class="close" (click)="dismiss(t.id)" aria-label="Cerrar">×</button>
+      <div class="row">
+        @if (t.imageUrl) {
+          <img [src]="t.imageUrl" alt="" (error)="onImageError($event)">
+        }
+        <div class="content">
+          <div class="title">{{ t.title }}</div>
+          @if (t.message) { <div class="msg">{{ t.message }}</div> }
+        </div>
+      </div>
+    </div>
+  }
+</div>

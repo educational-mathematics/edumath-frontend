@@ -6,6 +6,8 @@ import { BANK } from './test.bank';
 import { TestRole } from '../../core/models/test.model';
 import { DecimalPipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { switchMap, tap } from 'rxjs';
+import { Toast } from '../../core/toast';
 
 type VAK = 'visual'|'auditivo'|'kinestesico';
 
@@ -37,7 +39,7 @@ export class Test {
   @ViewChild('confettiCanvas') confettiCanvasRef?: ElementRef<HTMLCanvasElement>;
   private confettiTimer?: any;
 
-  constructor(private auth: Auth, private router: Router) {}
+  constructor(private auth: Auth, private router: Router, private toast: Toast) {}
 
   /** Botón CONTINUAR: aquí recién cargamos preguntas */
   confirmRole() {
@@ -70,24 +72,51 @@ export class Test {
   }
 
   submit() {
-    const scores = { visual: 0, auditivo: 0, kinestesico: 0 };
-    for (const q of this.questions) scores[q.type] += this.answers[q.id] ?? 0;
+    const totals: { visual: number; auditivo: number; kinestesico: number } = {
+    visual: 0, auditivo: 0, kinestesico: 0,
+    };
+    for (const q of this.questions) {
+      const val = this.answers[q.id] ?? 0;
+      totals[q.type] += val;
+    }
+    const vakStyle = (Object.entries(totals).sort((a,b)=>b[1]-a[1])[0][0]) as VAK;
 
-    const vakStyle = (Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0]) as VAK;
-
-    // Actualiza backend y luego muestra resultados (sin navegar aún)
     this.auth.updateUser({
       vakStyle,
-      vakScores: scores,
+      vakScores: totals,
       testAnsweredBy: this.answeredBy ?? 'alumno',
       testDate: new Date().toISOString(),
-      firstLoginDone: true
-    }).subscribe(() => {
-      this.resultScores = scores;
-      this.resultStyle = vakStyle;
-      this.showResults = true;
-      // lanza confetti
-      setTimeout(() => this.runConfetti(), 50);
+    })
+    .pipe(
+      switchMap(() => this.auth.markFirstLoginDone()),
+      tap(res => {
+        if (res.awardedWelcome) {
+          this.toast.success('¡Insignia obtenida: Bienvenido/a!', {
+            message: 'Ingresaste por primera vez a EduMath',
+            imageUrl: 'assets/welcome.png', // ajusta si usas otra ruta
+            timeoutMs: 3000
+          });
+        }
+      }),
+      switchMap(() => this.auth.refreshMe()),
+      // (opcional) TOP 1 → “El Rey”
+      // switchMap(() => this.auth.getMyRank()),
+    )
+    .subscribe({
+      next: () => {
+        this.resultScores = totals;
+        this.resultStyle = vakStyle;
+        this.showResults = true;
+        setTimeout(() => this.runConfetti(), 50);
+      },
+      error: () => {
+        // fallback visual si algo falla
+        this.resultScores = totals;
+        this.resultStyle = vakStyle;
+        this.showResults = true;
+        setTimeout(() => this.runConfetti(), 50);
+        this.toast.error('No se pudo marcar el primer ingreso', { timeoutMs: 2500 });
+      }
     });
   }
 

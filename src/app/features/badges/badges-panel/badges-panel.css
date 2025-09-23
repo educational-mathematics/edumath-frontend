@@ -1,0 +1,25 @@
+.badges { display:block; }
+.header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.link { background:none; border:none; color:var(--primary, #2563EB); cursor:pointer; font-weight:600; }
+
+.grid {
+  display:grid; gap:12px;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+}
+
+.badge {
+  display:flex; flex-direction:column; gap:6px; align-items:center; padding:12px;
+  background:var(--card, #fff); border-radius:12px; border:1px solid rgba(0,0,0,.06);
+  cursor:pointer; transition:transform .12s ease; text-align:center;
+}
+.badge:hover { transform: translateY(-2px); }
+
+.badge img {
+  width:72px; height:72px; border-radius:50%; object-fit:cover;
+  display:block;                        /* 👈 evita “salto”/texto alternativo visible */
+}
+.badge.locked img {
+  filter: grayscale(1) opacity(.6);
+}
+.title { font-size:.9rem; font-weight:600; line-height:1.2; }
+.empty { color:#666; }

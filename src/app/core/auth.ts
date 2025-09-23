@@ -13,6 +13,11 @@ interface Token {
   token_type: string;
 }
 
+interface FirstLoginDoneResp {
+  ok: boolean;
+  awardedWelcome: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class Auth {
   private api = inject(Api);
@@ -271,4 +276,9 @@ export class Auth {
       tap(u => this.setUser(u)) // actualiza user$ y storage
     );
   }
+
+  markFirstLoginDone() {
+    // llama al endpoint que marca first_login_done=true y otorga 'welcome' si corresponde
+    return this.api.post<FirstLoginDoneResp>('/users/me/first-login-done', {});
+}
 }

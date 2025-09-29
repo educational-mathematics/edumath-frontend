@@ -5,6 +5,7 @@ import { User } from './models/user.model';
 import { LoginRequest } from './models/login.model';
 import { RegisterRequest } from './models/register.model';
 import { RankingRow } from './models/ranking.model';
+import { Toast } from './toast';
 
 type Purpose = 'register' | 'reset_password';
 
@@ -15,11 +16,15 @@ interface Token {
 
 interface FirstLoginDoneResp {
   ok: boolean;
-  awardedWelcome: boolean;
+  awardedBadges?: Array<{
+    id: number; slug: string; title: string; description: string;
+    imageUrl: string; rarityPct: number; owned: boolean;
+  }>;
 }
 
 @Injectable({ providedIn: 'root' })
 export class Auth {
+  private toast = inject(Toast);
   private api = inject(Api);
 
   private tokenKey = 'token';
@@ -218,7 +223,6 @@ export class Auth {
     return this.api.get<RankingRow>('/ranking/me'); // tu fila (aunque estés fuera del top100)
   }
 
-
   changePassword(currentPassword: string, newPassword: string) {
     return this.api.post<{ message: string }>('/auth/change-password', {
       current_password: currentPassword,
@@ -278,7 +282,19 @@ export class Auth {
   }
 
   markFirstLoginDone() {
-    // llama al endpoint que marca first_login_done=true y otorga 'welcome' si corresponde
-    return this.api.post<FirstLoginDoneResp>('/users/me/first-login-done', {});
-}
+    return this.api.post<FirstLoginDoneResp>('/users/me/first-login-done', {}).pipe(
+      tap(resp => {
+        const list = resp.awardedBadges ?? [];
+        for (const b of list) {
+          this.toast.success(`¡Insignia obtenida! ${b.title}`, {
+            imageUrl: this.api.absolute(b.imageUrl),
+            timeoutMs: 4000
+          });
+        }
+        if (list.length) {
+          this.refreshMe().subscribe(); // mantener consistente el user$
+        }
+      }),
+    );
+  }
 }

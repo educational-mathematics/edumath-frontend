@@ -238,15 +238,15 @@ export class Profile implements OnInit, OnDestroy {
             else this.myOutside = null;
 
             // Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
-            if (!this.shownKingToast && meRow && meRow.rank === 1 && (meRow.points ?? 0) > 1000) {
-              this.toast.success('¡Insignia obtenida: El Rey!', {
-                message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
-                imageUrl: 'assets/king.png',
-                timeoutMs: 3000,
-              });
-              this.shownKingToast = true;
-              this.auth.refreshMe().subscribe({ error: () => {} });
-            }
+            //if (!this.shownKingToast && meRow && meRow.rank === 1 && (meRow.points ?? 0) > 1000) {
+              //this.toast.success('¡Insignia obtenida: El Rey!', {
+                //message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
+                //imageUrl: 'assets/king.png',
+                //timeoutMs: 3000,
+              //});
+              //this.shownKingToast = true;
+              //this.auth.refreshMe().subscribe({ error: () => {} });
+            //}
           },
           error: () => { this.myOutside = null; }
         });

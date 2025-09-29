@@ -8,6 +8,8 @@ import { DecimalPipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { switchMap, tap } from 'rxjs';
 import { Toast } from '../../core/toast';
+import { Api } from '../../core/api';
+import { inject } from '@angular/core';
 
 type VAK = 'visual'|'auditivo'|'kinestesico';
 
@@ -18,6 +20,8 @@ type VAK = 'visual'|'auditivo'|'kinestesico';
   styleUrl: './test.css'
 })
 export class Test {
+
+  private api = inject(Api);
   // Paso 0: quién responde
   answeredBy: TestRole | null = null;
   selectedRole: TestRole | null = null;
@@ -90,17 +94,20 @@ export class Test {
     .pipe(
       switchMap(() => this.auth.markFirstLoginDone()),
       tap(res => {
-        if (res.awardedWelcome) {
+        // Si quieres un toast específico SOLO para 'welcome', puedes filtrarlo:
+        const list = res.awardedBadges ?? [];
+        const welcome = list.find(b => b.slug === 'welcome');
+        if (welcome) {
           this.toast.success('¡Insignia obtenida: Bienvenido/a!', {
             message: 'Ingresaste por primera vez a EduMath',
-            imageUrl: 'assets/welcome.png', // ajusta si usas otra ruta
+            imageUrl: this.api.absolute(welcome.imageUrl) as string, // o ruta local si prefieres
             timeoutMs: 3000
           });
         }
+        // OJO: markFirstLoginDone ya lanza toasts genéricos por cada insignia; 
+        // si no quieres duplicar, elimina este bloque y confía en markFirstLoginDone().
       }),
       switchMap(() => this.auth.refreshMe()),
-      // (opcional) TOP 1 → “El Rey”
-      // switchMap(() => this.auth.getMyRank()),
     )
     .subscribe({
       next: () => {
@@ -110,7 +117,6 @@ export class Test {
         setTimeout(() => this.runConfetti(), 50);
       },
       error: () => {
-        // fallback visual si algo falla
         this.resultScores = totals;
         this.resultStyle = vakStyle;
         this.showResults = true;

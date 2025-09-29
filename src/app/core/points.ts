@@ -7,13 +7,12 @@ interface ChangePointsResp {
   ok: boolean;
   points: number;
   awardedBadges: Array<{
-    id: number; slug: string; title: string; description: string;
-    imageUrl: string; rarityPct: number; owned: boolean;
+    id: number; slug: string; title: string; imageUrl: string; rarityPct: number; owned: boolean;
   }>;
 }
 
 @Injectable({ providedIn: 'root' })
-export class PointsService {
+export class Points {
   private api = inject(Api);
   private toast = inject(Toast);
 
@@ -26,7 +25,6 @@ export class PointsService {
             timeoutMs: 4000,
           });
         }
-        // Nota: el que refresca /me debe ser quien llama este método (por ej. Auth o el componente)
       })
     );
   }

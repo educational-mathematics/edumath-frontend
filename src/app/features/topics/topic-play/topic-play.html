@@ -1,0 +1,95 @@
+@if (ready) {
+  <div class="wrap">
+    <div class="header">
+      <h2>{{ title }}</h2>
+      <div class="right">
+        <span>Estilo: <b>{{ style }}</b></span>
+        <span class="timer">{{ elapsedSec }} s</span>
+      </div>
+    </div>
+
+    @if (explanation) {
+      <div class="explain">
+        <p>{{ explanation }}</p>
+        @if (style === 'auditivo' && ttsUrl) {
+          <audio [src]="ttsUrl" controls></audio>
+        }
+      </div>
+    }
+
+    @if (item; as it) {
+      <section>
+        <div class="qhead">Ejercicio {{ currentIndex + 1 }} / 10</div>
+
+        @if (it.type === 'multiple_choice') {
+          <div class="mcq">
+            <div class="q">{{ it.question }}</div>
+            @if (it.imageUrl) { <img [src]="it.imageUrl" alt="" class="qimg" /> }
+            @for (c of it.choices; let i = $index; track i) {
+              <label class="opt">
+                <input type="radio" name="mcq" [value]="i" [(ngModel)]="mcqAnswer" />
+                {{ c }}
+              </label>
+            }
+            <div class="actions">
+              <button (click)="submit(mcqAnswer)">Responder</button>
+            </div>
+          </div>
+        }
+
+        @if (it.type === 'match_pairs') {
+          <div class="pairs">
+            <div class="q">{{ it.title || 'Empareja' }}</div>
+            @for (L of lefts; let i = $index; track i) {
+              <div class="row">
+                <span class="left">{{ L }}</span>
+                <select [(ngModel)]="pairAnswer[i]">
+                  @for (R of rights; track R) { <option [value]="R">{{ R }}</option> }
+                </select>
+              </div>
+            }
+            <button (click)="submitPairs()">Responder</button>
+          </div>
+        }
+
+        @if (it.type === 'drag_to_bucket') {
+          <div class="buckets">
+            <div class="q">{{ it.title || 'Clasifica' }}</div>
+            @for (b of it.buckets; track b) {
+              <div class="bucket">
+                <div class="bname">{{ b }}</div>
+                <div class="opts">
+                  @for (x of it.items; track x) {
+                    <label class="chk">
+                      <input
+                        type="checkbox"
+                        [checked]="bucketAnswer[b].has(x)"
+                        (change)="toggleBucket(b, x, $event)"
+                      />
+                      {{ x }}
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+            <button (click)="submitBuckets()">Responder</button>
+          </div>
+        }
+
+        @if (feedback !== null || lastCorrect !== null) {
+          <div class="feedback">
+            <span [class.ok]="lastCorrect === true" [class.err]="lastCorrect === false">
+              {{ lastCorrect ? '¡Correcto!' : 'Incorrecto' }}
+            </span>
+            @if (feedback && lastCorrect === false) {
+              <div class="text">{{ feedback }}</div>
+            }
+            @if (lastCorrect === false) {
+              <button (click)="retry()">Volver a intentar</button>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+}

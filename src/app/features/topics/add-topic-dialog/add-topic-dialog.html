@@ -1,0 +1,45 @@
+<!-- Backdrop -->
+@if (open) {
+  <div class="backdrop" (click)="close()">
+    <!-- Modal -->
+    <div class="modal" (click)="stop($event)" role="dialog" aria-modal="true">
+      <div class="header">
+        <h3>Elegir un tema</h3>
+        <button class="x" (click)="close()" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="grades">
+        @for (g of grades; track g) {
+          <button
+            (click)="selGrade = g"
+            [class.active]="selGrade === g"
+          >
+            {{ g }}° grado
+          </button>
+        }
+      </div>
+
+      @if (catalog[selGrade].length) {
+        <div class="list">
+          @for (t of catalog[selGrade]; track t.id) {
+            <div
+              class="item"
+              [class.disabled]="isAdded(t)"
+              (click)="pick(t)"
+              title="Agregar este tema"
+            >
+              <img
+                [src]="t.coverUrl || 'assets/topic-placeholder.png'"
+                alt=""
+                draggable="false"
+              />
+              <div class="title">{{ t.title }}</div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="empty">No hay temas disponibles para este grado.</p>
+      }
+    </div>
+  </div>
+}

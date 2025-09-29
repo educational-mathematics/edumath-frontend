@@ -1,0 +1,28 @@
+.wrap { max-width: 920px; margin: 0 auto; padding: 12px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.right { display: flex; gap: 12px; align-items: center; }
+.timer { background: #eef; padding: 4px 8px; border-radius: 6px; }
+
+.explain {
+  background: #f8fafc; padding: 12px; border-radius: 12px; margin: 10px 0;
+  user-select: text;
+}
+.qhead { font-weight: 700; margin: 10px 0; }
+
+.qimg { max-width: 240px; display: block; margin: 8px 0; border-radius: 8px; }
+
+.mcq .opt { display: block; margin: 6px 0; }
+.actions { margin-top: 8px; }
+
+.pairs .row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+.pairs .left { display: inline-block; min-width: 80px; font-weight: 600; }
+
+.buckets { display: grid; gap: 12px; }
+.bucket { border: 1px dashed #cdd; border-radius: 8px; padding: 8px; }
+.bucket .bname { font-weight: 700; margin-bottom: 6px; }
+.chk { display: inline-flex; align-items: center; gap: 6px; margin-right: 10px; }
+
+.feedback { margin-top: 12px; }
+.feedback .ok { color: #0a7; font-weight: 700; }
+.feedback .err { color: #b00; font-weight: 700; }
+.feedback .text { margin: 6px 0; }

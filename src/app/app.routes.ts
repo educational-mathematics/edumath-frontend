@@ -30,6 +30,7 @@ export const routes: Routes = [
     { path: 'welcome', component: Welcome, canActivate: [onboardingGuard] }, 
     { path: 'test', component: Test, canActivate: [onboardingGuard] },
     { path: 'home', component: Home, canActivate: [authGuard] },
+    { path: 'topic/:slug', loadComponent: () => import('./features/topics/topic-play/topic-play').then(m => m.TopicPlay) },
     { path: 'profile', component: Profile, canActivate: [authGuard] },
     { path: 'settings', component: Settings, canActivate: [authGuard] },
     { path: 'assistant', component: Assistant, canActivate: [authGuard] },

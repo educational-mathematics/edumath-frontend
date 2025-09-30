@@ -20,4 +20,8 @@ export class Topics {
   openBySlug(slug: string) {
     return this.api.post<any>(`/topics/slug/${slug}/open`, {});
   }
+
+  exit(sessionId: number, elapsedSec: number) {
+    return this.api.post<any>(`/topics/session/${sessionId}/exit`, { elapsedSec });
+  }
 }

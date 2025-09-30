@@ -5,6 +5,7 @@
       <div class="right">
         <span>Estilo: <b>{{ style }}</b></span>
         <span class="timer">{{ elapsedSec }} s</span>
+        <button class="exit" (click)="exit()">Salir</button>
       </div>
     </div>
 
@@ -27,7 +28,7 @@
             @if (it.imageUrl) { <img [src]="it.imageUrl" alt="" class="qimg" /> }
             @for (c of it.choices; let i = $index; track i) {
               <label class="opt">
-                <input type="radio" name="mcq" [value]="i" [(ngModel)]="mcqAnswer" />
+                <input type="radio" name="mcq" [value]="i" [(ngModel)]="mcqAnswer" (change)="lastCorrect=null; feedback=null" />
                 {{ c }}
               </label>
             }

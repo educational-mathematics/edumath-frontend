@@ -43,6 +43,8 @@ export class TopicPlay {
   elapsedSec = 0;
   private ticker: any;
 
+  progressPct = 0;
+  
   ready = false;
 
   ngOnInit() {
@@ -55,6 +57,17 @@ export class TopicPlay {
       this.items = res.items || [];
       this.currentIndex = res.currentIndex || 0;
       this.item = this.items[this.currentIndex] || null;
+
+      if (this.style === 'auditivo' && this.explanation) {
+        fetch('http://localhost:8000/ai/tts', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ text: this.explanation, voice: 'Kore' })
+        })
+          .then(async r => r.status === 204 ? null : r.blob())
+          .then(b => this.ttsUrl = b ? URL.createObjectURL(b) : null)
+          .catch(() => this.ttsUrl = null);
+      }
 
       this.prepareForItem();
       this.startTimer();
@@ -121,10 +134,23 @@ export class TopicPlay {
     this.submit(sol);
   }
 
-  retry() { this.feedback = null; }
+  retry() { 
+    this.feedback = null;
+    this.lastCorrect = null;
+    this.mcqAnswer = null;
+    this.pairAnswer = this.pairAnswer?.map(() => '');
+    Object.keys(this.bucketAnswer).forEach(b => this.bucketAnswer[b].clear());
+  }
+
   finish() {
     this.topics.finish(this.sessionId).subscribe(() => {
       this.router.navigateByUrl('/home');
     });
+  }
+
+  exit() {
+    if (confirm('¿Salir del tema? Tu progreso se guardará.')) {
+      this.router.navigateByUrl('/home');
+    }
   }
 }

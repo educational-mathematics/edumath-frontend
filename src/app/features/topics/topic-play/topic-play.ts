@@ -58,6 +58,8 @@ export class TopicPlay {
       this.currentIndex = res.currentIndex || 0;
       this.item = this.items[this.currentIndex] || null;
 
+      this.ttsUrl = res.explanationAudioUrl || null;
+
       if (this.style === 'auditivo' && this.explanation) {
         fetch('http://localhost:8000/ai/tts', {
           method: 'POST',

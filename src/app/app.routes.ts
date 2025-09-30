@@ -12,6 +12,7 @@ import { onboardingGuard } from './core/guards/onboarding-guard';
 import { authGuard } from './core/guards/auth-guard';
 import { verifyEntryGuard } from './core/guards/verify-entry-guard';
 import { forgotEntryGuard } from './core/guards/forgot-entry-guard';
+import { authenticationGuard, completedGuard, onboardingOnlyGuard } from './core/guards/authentication-guard';
 
 export const routes: Routes = [
     { path: 'login', component: Login, canActivate: [publicGuard] },
@@ -27,12 +28,12 @@ export const routes: Routes = [
         canActivate: [publicGuard, forgotEntryGuard]
     },
 
-    { path: 'welcome', component: Welcome, canActivate: [onboardingGuard] }, 
-    { path: 'test', component: Test, canActivate: [onboardingGuard] },
-    { path: 'home', component: Home, canActivate: [authGuard] },
+    { path: 'welcome', component: Welcome, canMatch: [authenticationGuard, onboardingOnlyGuard] }, 
+    { path: 'test', component: Test, canMatch: [authenticationGuard, onboardingOnlyGuard] },
+    { path: 'home', component: Home, canMatch: [authenticationGuard, completedGuard] },
     { path: 'topic/:slug', loadComponent: () => import('./features/topics/topic-play/topic-play').then(m => m.TopicPlay) },
-    { path: 'profile', component: Profile, canActivate: [authGuard] },
-    { path: 'settings', component: Settings, canActivate: [authGuard] },
-    { path: 'assistant', component: Assistant, canActivate: [authGuard] },
+    { path: 'profile', component: Profile, canMatch: [authenticationGuard, completedGuard] },
+    { path: 'settings', component: Settings, canMatch: [authenticationGuard, completedGuard] },
+    { path: 'assistant', component: Assistant, canMatch: [authenticationGuard, completedGuard] },
     { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];

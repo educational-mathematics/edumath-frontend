@@ -11,10 +11,10 @@
 
     @if (explanation) {
       <div class="explain">
-        <p>{{ explanation }}</p>
         @if (style === 'auditivo' && ttsUrl) {
           <audio [src]="ttsUrl" controls></audio>
         }
+        <p>{{ explanation }}</p>
       </div>
     }
 
@@ -24,11 +24,22 @@
 
         @if (it.type === 'multiple_choice') {
           <div class="mcq">
+            @if (it.ttsUrl) {
+              <audio [src]="it.ttsUrl" controls></audio>
+            }
             <div class="q">{{ it.question }}</div>
-            @if (it.imageUrl) { <img [src]="it.imageUrl" alt="" class="qimg" /> }
+            @if (it.imageUrl) {
+              <img [src]="it.imageUrl" alt="" class="qimg" />
+            }
             @for (c of it.choices; let i = $index; track i) {
               <label class="opt">
-                <input type="radio" name="mcq" [value]="i" [(ngModel)]="mcqAnswer" (change)="lastCorrect=null; feedback=null" />
+                <input
+                  type="radio"
+                  name="mcq"
+                  [value]="i"
+                  [(ngModel)]="mcqAnswer"
+                  (change)="lastCorrect=null; feedback=null"
+                />
                 {{ c }}
               </label>
             }
@@ -45,7 +56,9 @@
               <div class="row">
                 <span class="left">{{ L }}</span>
                 <select [(ngModel)]="pairAnswer[i]">
-                  @for (R of rights; track R) { <option [value]="R">{{ R }}</option> }
+                  @for (R of rights; track R) {
+                    <option [value]="R">{{ R }}</option>
+                  }
                 </select>
               </div>
             }

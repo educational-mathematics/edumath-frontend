@@ -21,6 +21,10 @@
 .bucket { border: 1px dashed #cdd; border-radius: 8px; padding: 8px; }
 .bucket .bname { font-weight: 700; margin-bottom: 6px; }
 .chk { display: inline-flex; align-items: center; gap: 6px; margin-right: 10px; }
+.bucket-matrix { width:100%; border-collapse:collapse; }
+.bucket-matrix th, .bucket-matrix td { padding:.4rem .6rem; border-bottom:1px solid #e5e7eb; }
+.bucket-matrix thead th { border-bottom:2px solid #e5e7eb; }
+.center { text-align:center; }
 
 .feedback { margin-top: 12px; }
 .feedback .ok { color: #0a7; font-weight: 700; }

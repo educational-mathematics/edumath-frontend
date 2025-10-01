@@ -76,9 +76,7 @@ export class Test {
   }
 
   submit() {
-    const totals: { visual: number; auditivo: number; kinestesico: number } = {
-    visual: 0, auditivo: 0, kinestesico: 0,
-    };
+    const totals = { visual: 0, auditivo: 0, kinestesico: 0 as const };
     for (const q of this.questions) {
       const val = this.answers[q.id] ?? 0;
       totals[q.type] += val;
@@ -92,21 +90,9 @@ export class Test {
       testDate: new Date().toISOString(),
     })
     .pipe(
+      // marca primer login (esto ya muestra el toast y refresca user)
       switchMap(() => this.auth.markFirstLoginDone()),
-      tap(res => {
-        // Si quieres un toast específico SOLO para 'welcome', puedes filtrarlo:
-        const list = res.awardedBadges ?? [];
-        const welcome = list.find(b => b.slug === 'welcome');
-        if (welcome) {
-          this.toast.success('¡Insignia obtenida: Bienvenido/a!', {
-            message: 'Ingresaste por primera vez a EduMath',
-            imageUrl: this.api.absolute(welcome.imageUrl) as string, // o ruta local si prefieres
-            timeoutMs: 3000
-          });
-        }
-        // OJO: markFirstLoginDone ya lanza toasts genéricos por cada insignia; 
-        // si no quieres duplicar, elimina este bloque y confía en markFirstLoginDone().
-      }),
+      // ⚠️ elimina el tap anterior que leía res.awardedBadges y mostraba otro toast
       switchMap(() => this.auth.refreshMe()),
     )
     .subscribe({

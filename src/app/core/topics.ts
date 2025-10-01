@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Api } from './api';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,10 +16,13 @@ export class Topics {
   answer(sessionId: number, index: number, answer: any) {
     return this.api.post<any>(`/topics/session/${sessionId}/answer`, { index, answer });
   }
-  finish(sessionId: number) { return this.api.post<any>(`/topics/session/${sessionId}/finish`, {}); }
+  finish(sessionId: number, timeSec: number): Observable<any> {
+    return this.api.post<any>(`/topics/session/${sessionId}/finish`, { timeSec });
+  }
 
-  openBySlug(slug: string) {
-    return this.api.post<any>(`/topics/slug/${slug}/open`, {});
+  openBySlug(slug: string, reset: boolean = false) {
+    const q = reset ? '?reset=true' : '';
+    return this.api.post<any>(`/topics/slug/${slug}/open${q}`, {});
   }
 
   exit(sessionId: number, elapsedSec: number) {

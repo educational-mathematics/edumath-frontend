@@ -31,7 +31,10 @@ export const routes: Routes = [
     { path: 'welcome', component: Welcome, canMatch: [authenticationGuard, onboardingOnlyGuard] }, 
     { path: 'test', component: Test, canMatch: [authenticationGuard, onboardingOnlyGuard] },
     { path: 'home', component: Home, canMatch: [authenticationGuard, completedGuard] },
-    { path: 'topic/:slug', loadComponent: () => import('./features/topics/topic-play/topic-play').then(m => m.TopicPlay) },
+    { path: 'topic/:slug',
+        loadComponent: () => import('./features/topics/topic-play/topic-play').then(m => m.TopicPlay),
+        canMatch: [authenticationGuard, completedGuard]
+    },
     { path: 'profile', component: Profile, canMatch: [authenticationGuard, completedGuard] },
     { path: 'settings', component: Settings, canMatch: [authenticationGuard, completedGuard] },
     { path: 'assistant', component: Assistant, canMatch: [authenticationGuard, completedGuard] },

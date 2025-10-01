@@ -4,7 +4,7 @@
       <h2>{{ title }}</h2>
       <div class="right">
         <span>Estilo: <b>{{ style }}</b></span>
-        <span class="timer">{{ elapsedSec }} s</span>
+        <span class="timer">{{ formatTime(elapsedSec) }}</span>
         <button class="exit" (click)="exit()">Salir</button>
       </div>
     </div>
@@ -68,24 +68,35 @@
 
         @if (it.type === 'drag_to_bucket') {
           <div class="buckets">
-            <div class="q">{{ it.title || 'Clasifica' }}</div>
-            @for (b of it.buckets; track b) {
-              <div class="bucket">
-                <div class="bname">{{ b }}</div>
-                <div class="opts">
-                  @for (x of it.items; track x) {
-                    <label class="chk">
-                      <input
-                        type="checkbox"
-                        [checked]="bucketAnswer[b].has(x)"
-                        (change)="toggleBucket(b, x, $event)"
-                      />
-                      {{ x }}
-                    </label>
-                  }
-                </div>
-              </div>
-            }
+            <div class="q">{{ it.title || 'Clasifica fracciones' }}</div>
+          
+            <table class="bucket-matrix">
+              <thead>
+                <tr>
+                  <th>Ítem</th>
+                  @for (b of it.buckets; track b) { <th>{{ b }}</th> }
+                </tr>
+              </thead>
+              <tbody>
+                @for (x of it.items; track x) {
+                  <tr>
+                    <td>{{ x }}</td>
+                    @for (b of it.buckets; track b) {
+                      <td class="center">
+                        <input
+                          type="radio"
+                          [name]="'bucket-'+x"
+                          [value]="b"
+                          [checked]="bucketChoice[x] === b"
+                          (change)="chooseBucket(x, b)"
+                        />
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          
             <button (click)="submitBuckets()">Responder</button>
           </div>
         }
@@ -104,6 +115,17 @@
           </div>
         }
       </section>
+    }
+    @if (showFinish && finishStats) {
+      <div class="backdrop finish">
+        <div class="modal done">
+          <h3>¡Tema completado! 🎉</h3>
+          <p>Tiempo: <b>{{ formatTime(finishStats.timeSec) }}</b></p>
+          <p>Errores: <b>{{ finishStats.mistakes }}</b></p>
+          <p>Precisión: <b>{{ finishStats.precisionPct }}%</b></p>
+          <button class="primary" (click)="goToHome()">Ir a inicio</button>
+        </div>
+      </div>
     }
   </div>
 }

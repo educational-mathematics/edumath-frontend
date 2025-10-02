@@ -14,6 +14,9 @@
         @if (style === 'auditivo' && ttsUrl) {
           <audio [src]="ttsUrl" controls></audio>
         }
+        @if (style === 'visual' && explanationImageUrl) {
+          <img [src]="explanationImageUrl" alt="" class="expimg"/>
+        }
         <p>{{ explanation }}</p>
       </div>
     }

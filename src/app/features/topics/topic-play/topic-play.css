@@ -30,3 +30,9 @@
 .feedback .ok { color: #0a7; font-weight: 700; }
 .feedback .err { color: #b00; font-weight: 700; }
 .feedback .text { margin: 6px 0; }
+.explain .explain-img {
+  max-width: 100%;
+  height: auto;
+  margin: 8px 0 12px;
+  border-radius: 8px;
+}

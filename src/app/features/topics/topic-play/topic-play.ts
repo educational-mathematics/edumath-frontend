@@ -56,6 +56,8 @@ export class TopicPlay {
   showFinish = false;
   finishStats: { timeSec: number; mistakes: number; precisionPct: number } | null = null;
 
+  explanationImageUrl: string | null = null;
+
   ngOnInit() {
     const slug = this.route.snapshot.paramMap.get('slug')!;
     this.topics.openBySlug(slug).subscribe(res => {
@@ -76,13 +78,17 @@ export class TopicPlay {
   private _load(res: any) {
     this.sessionId = res.sessionId;
     this.title = res.title;
-    this.style = res.style;
+    this.style = res.style as VAK;
     this.explanation = res.explanation || null;
     this.items = res.items || [];
     this.currentIndex = res.currentIndex || 0;
     this.item = this.items[this.currentIndex] || null;
 
+    // Audio (auditorio)
     this.ttsUrl = res.explanationAudioUrl || null;
+
+    // Imagen (visual). Acepta ambos nombres para compatibilidad:
+    this.explanationImageUrl = res.explanationImageUrl || null;
 
     if (this.style === 'auditivo' && this.explanation) {
       fetch('http://localhost:8000/ai/tts', {
@@ -134,20 +140,22 @@ export class TopicPlay {
 
   private async doFinishFlow() {
     try {
-      await firstValueFrom(this.topics.finish(this.sessionId, this.elapsedSec));
-    } catch {}
-  
-    const mistakes = (this.items ?? []).reduce(
-      (acc, _it, i) => acc + (this.items[i]?.__wrongAttempts || 0),
-      0
-    );
-  
-    this.finishStats = {
-      timeSec: this.elapsedSec,
-      mistakes,
-      precisionPct: Math.round((this.currentIndex / (this.items?.length || 10)) * 100)
-    };
-  
+      const r = await firstValueFrom(this.topics.finish(this.sessionId, this.elapsedSec));
+      this.finishStats = {
+        timeSec: r.timeSec ?? this.elapsedSec,
+        mistakes: r.mistakes ?? 0,
+        precisionPct: r.precisionPct ?? Math.round((this.currentIndex / (this.items?.length || 10)) * 100)
+      };
+    } catch {
+      const mistakes = (this.items ?? []).reduce(
+        (acc, _it, i) => acc + (this.items[i]?.__wrongAttempts || 0), 0
+      );
+      this.finishStats = {
+        timeSec: this.elapsedSec,
+        mistakes,
+        precisionPct: Math.round((this.currentIndex / (this.items?.length || 10)) * 100)
+      };
+    }
     this.showFinish = true;
     clearInterval(this.ticker);
   }

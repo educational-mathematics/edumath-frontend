@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Topics } from '../../../core/topics';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-add-topic-dialog',
@@ -10,6 +11,8 @@ import { Topics } from '../../../core/topics';
 })
 export class AddTopicDialog {
   private topics = inject(Topics);
+
+  readonly apiBase = environment.apiUrl;
 
   /** Controla visibilidad (el padre hace *ngIf para montarlo/desmontarlo). */
   @Input() open = false;

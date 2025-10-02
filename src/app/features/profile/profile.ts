@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Auth } from '../../core/auth';
 import { Navbar } from '../../shared/components/navbar/navbar';
-import { RankingRow } from '../../core/models/ranking.model'; // 👈 crea este interface { rank, alias, points, avatar_url? }
+import { RankingRow } from '../../core/models/ranking.model';
 import { BadgesPanel } from '../badges/badges-panel/badges-panel';
 import { Toast } from '../../core/toast';
 
@@ -210,7 +210,7 @@ export class Profile implements OnInit, OnDestroy {
           // no muestres “fuera del top”
           this.myOutside = null;
 
-          // 👑 Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
+          // Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
           if (!this.shownKingToast && inTop.rank === 1 && (inTop.points ?? 0) > 1000) {
             this.toast.success('¡Insignia obtenida: El Rey!', {
               message: 'Has alcanzado el TOP 1 con más de 1000 puntos',

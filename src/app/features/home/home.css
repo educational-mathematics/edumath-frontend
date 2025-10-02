@@ -1,11 +1,268 @@
-.header { display:flex; justify-content:space-between; align-items:center; }
-.add { border-radius: 999px; padding: 8px 16px; background:#3366ff; color:#fff; border:0; cursor:pointer; }
-.empty { text-align:center; padding:40px; color:#6b7280; user-select:none; }
-.empty img { width:180px; opacity:.8; -webkit-user-drag:none; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:16px; margin-top: 12px; }
-.card { border-radius:16px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.08); padding:12px; cursor:pointer; }
-.card img { width:100%; border-radius:12px; -webkit-user-drag:none; }
-.title { margin:8px 0; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.progress { height:8px; background:#e5e7eb; border-radius:8px; overflow:hidden; }
-.bar { height:100%; background:#223d8f; }
-.pct { text-align:right; margin-top:4px; color:#223d8f; font-weight:600; }
+/* ========================================================= */
+/* Contenedor principal (Se mantiene) */
+.home-container {
+    max-width: 1200px;
+    margin: 32px auto;
+    padding: 0 24px;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Encabezado y Botón (Se mantienen los estilos profesionales) */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.header h2 {
+    margin: 0;
+    font-weight: 800;
+    color: #1e3a8a;
+}
+.add {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 12px;
+    font-weight: 700;
+    padding: 10px 18px;
+    background: #1976d2;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(25, 118, 210, 0.28);
+    transition: transform .1s ease, box-shadow .2s ease;
+}
+.add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.35);
+}
+
+/* Mensaje de vacío (Se mantiene) */
+.empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #5b6b7a;
+    user-select: none;
+    background: #f8fbff;
+    border: 1px dashed #c7dbff;
+    border-radius: 16px;
+    margin-top: 30px;
+}
+.empty img { 
+    width: 150px; 
+    opacity: .9; 
+    margin-bottom: 12px; 
+    -webkit-user-drag: none; 
+}
+.empty p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* ========================================================= */
+/* Grid de Temas: AJUSTADO PARA TARJETAS LARGAS Y DELGADAS */
+.grid {
+    /* La grilla principal ahora tendrá 1 columna para que las tarjetas ocupen todo el ancho disponible */
+    display: block; 
+    grid-template-columns: 1fr; 
+    max-width: 620px; /* Limita el ancho máximo para mejor lectura */
+    gap: 12px; /* Reducimos el espacio entre tarjetas, ya que son largas */
+    margin-top: 12px;
+}
+
+/* Tarjeta individual (Card): DISEÑO HORIZONTAL Y DELGADO */
+.card {
+    display: grid;
+    /* Divide la tarjeta en: una columna pequeña para la imagen y el resto para el contenido */
+    grid-template-columns: 150px 1fr; 
+    align-items: center; /* Centra el contenido verticalmente */
+    
+    border-radius: 16px;
+    background: #fff;
+    /* Reducimos el padding general para hacerla más delgada */
+    padding: 18px; 
+    cursor: pointer;
+    
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.08); /* Sombra más sutil */
+    border: 1px solid #e8eef8;
+    transition: transform .1s ease, box-shadow .2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px); /* Menor elevación, más sutil */
+    box-shadow: 0 8px 16px rgba(25, 118, 210, 0.12);
+}
+
+/* Contenido a la derecha de la imagen */
+.card-content {
+    padding: 0 12px; /* Espacio entre imagen y texto */
+    display: grid;
+    gap: 4px; /* Espacio pequeño entre elementos de contenido */
+}
+
+.card img { 
+    width: 140px; /* Ancho fijo para la columna 1 */
+    height: 100px; /* Altura muy reducida para hacerla delgada */
+    object-fit: cover;
+    border-radius: 10px; 
+    -webkit-user-drag: none;
+    align-self: center; /* Asegura la alineación en la celda del grid */
+}
+
+.title { 
+    margin: 0;
+    font-weight: 600; 
+    font-size: 1rem; 
+    color: #0f172a;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+/* Área de progreso (necesita ser flexible) */
+.progress-area {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.progress { 
+    flex-grow: 1; /* Ocupa el espacio restante */
+    height: 6px; 
+    background: #e0e7f3; 
+    border-radius: 6px; 
+    overflow: hidden; 
+}
+.bar { 
+    height: 100%; 
+    background: #1976d2; 
+}
+
+.pct { 
+    /* El porcentaje ya no se alinea a la derecha, está junto a la barra */
+    text-align: right; 
+    font-size: 0.85rem;
+    color: #1976d2; 
+    font-weight: 700; 
+    white-space: nowrap;
+}
+
+/* Media Query para pantallas pequeñas */
+@media (max-width: 600px) {
+    .home-container { padding: 0 16px; margin: 20px auto; }
+    
+    .card {
+        /* Reducimos el tamaño de la imagen en móvil */
+        grid-template-columns: 80px 1fr;
+        padding: 6px;
+    }
+    .card img {
+        width: 80px;
+        height: 50px;
+    }
+}
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeBackdrop 0.3s ease-in-out;
+}
+
+.modal {
+  background: #fff;
+  padding: 32px 28px;
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 460px;
+  text-align: center;
+  animation: scaleIn 0.25s ease-out;
+  transform-origin: center;
+}
+
+.modal h3 {
+  margin-top: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  letter-spacing: -0.5px;
+}
+
+.modal p {
+  color: #4b5563;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 16px 0 24px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+/* Botón primario */
+button.primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+/* Botón secundario */
+button.secondary {
+  background: #f9fafb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+button.secondary:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+/* Botón peligro */
+button.danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+button.danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+}
+
+/* Animaciones */
+@keyframes fadeBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}

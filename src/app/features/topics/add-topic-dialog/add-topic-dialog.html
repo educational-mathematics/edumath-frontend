@@ -28,11 +28,7 @@
               (click)="pick(t)"
               title="Agregar este tema"
             >
-              <img
-                [src]="t.coverUrl || 'assets/topic-placeholder.png'"
-                alt=""
-                draggable="false"
-              />
+              <img [src]="t.coverUrl?.startsWith('/static') ? (apiBase + t.coverUrl) : t.coverUrl" draggable="false">
               <div class="title">{{ t.title }}</div>
             </div>
           }

@@ -5,21 +5,39 @@
       <div class="right">
         <span>Estilo: <b>{{ style }}</b></span>
         <span class="timer">{{ formatTime(elapsedSec) }}</span>
-        <button class="exit" (click)="exit()">Salir</button>
+        <button class="exit" (click)="confirmExit()">Salir</button>
       </div>
     </div>
 
     @if (explanation) {
       <div class="explain">
         @if (style === 'auditivo' && ttsUrl) {
-          <audio [src]="ttsUrl" controls></audio>
+                <audio [src]="ttsUrl" controls #ttsAudio style="display: none;"></audio>
+   
+                <div class="custom-audio-control" (click)="toggleAudio()">
+            <div class="audio-icon">
+              @if (audioState === 'playing') {
+                <span>⏸️</span>           } @else {
+                <span>🔊</span>           }
+            </div>
+            <div class="audio-status">
+              @if (audioState === 'loading') {
+                <span class="loading-text">Cargando audio...</span>
+              } @else if (audioState === 'playing') {
+                <span>Reproduciendo explicación.</span>
+              } @else {
+                <span>Escuchar explicación.</span>
+              }
+            </div>
+          </div>
         }
-        @if (style === 'visual' && explanationImageUrl) {
-          <img [src]="explanationImageUrl" alt="" class="expimg"/>
+            @if (style === 'visual' && explanationImageUrl) {
+          <img [src]="explanationImageUrl" alt="" class="expimg"/>
         }
         <p>{{ explanation }}</p>
       </div>
     }
+
 
     @if (item; as it) {
       <section>
@@ -28,7 +46,10 @@
         @if (it.type === 'multiple_choice') {
           <div class="mcq">
             @if (it.ttsUrl) {
-              <audio [src]="it.ttsUrl" controls></audio>
+              <audio [src]="it.ttsUrl" controls #questionAudio style="display: none;"></audio>
+              <button class="play-button" (click)="toggleQuestionAudio()">
+                <span>🔊 Escuchar pregunta</span>
+              </button>
             }
             <div class="q">{{ it.question }}</div>
             @if (it.imageUrl) {
@@ -47,11 +68,11 @@
               </label>
             }
             <div class="actions">
-              <button (click)="submit(mcqAnswer)">Responder</button>
+              <button class="primary" (click)="submit(mcqAnswer)">Responder</button>
             </div>
           </div>
         }
-
+        
         @if (it.type === 'match_pairs') {
           <div class="pairs">
             <div class="q">{{ it.title || 'Empareja' }}</div>
@@ -65,7 +86,7 @@
                 </select>
               </div>
             }
-            <button (click)="submitPairs()">Responder</button>
+            <button class="primary" (click)="submitPairs()">Responder</button>
           </div>
         }
 
@@ -99,8 +120,7 @@
                 }
               </tbody>
             </table>
-          
-            <button (click)="submitBuckets()">Responder</button>
+            <button class="primary" (click)="submitBuckets()">Responder</button>
           </div>
         }
 
@@ -113,22 +133,50 @@
               <div class="text">{{ feedback }}</div>
             }
             @if (lastCorrect === false) {
-              <button (click)="retry()">Volver a intentar</button>
+              <button class="secondary" (click)="retry()">Volver a intentar</button>
             }
           </div>
         }
       </section>
     }
-    @if (showFinish && finishStats) {
-      <div class="backdrop finish">
-        <div class="modal done">
-          <h3>¡Tema completado! 🎉</h3>
-          <p>Tiempo: <b>{{ formatTime(finishStats.timeSec) }}</b></p>
-          <p>Errores: <b>{{ finishStats.mistakes }}</b></p>
-          <p>Precisión: <b>{{ finishStats.precisionPct }}%</b></p>
-          <button class="primary" (click)="goToHome()">Ir a inicio</button>
-        </div>
-      </div>
-    }
+    
   </div>
 }
+
+@if (showFinish && finishStats) {
+  <div class="backdrop finish">
+    <canvas id="confetti-canvas"></canvas> <div class="modal done">
+      <h3>¡Tema completado! 🎉</h3>
+      <p>Tiempo: <b>{{ formatTime(finishStats.timeSec) }}</b></p>
+      <p>Errores: <b>{{ finishStats.mistakes }}</b></p>
+      <p>Precisión: <b>{{ finishStats.precisionPct }}%</b></p>
+      <button class="primary" (click)="goToHome()">Ir a inicio</button>
+    </div>
+  </div>
+}
+
+@if (showExitConfirm) {
+  <div class="backdrop">
+    <div class="modal">
+      <h3>¿Deseas salir?</h3>
+      <p>Tu progreso se guardará y podrás continuar más tarde.</p>
+      <div class="modal-actions">
+        <button class="secondary" (click)="showExitConfirm = false">Cancelar</button>
+        <button class="primary danger" (click)="exit()">Salir y Guardar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!--@if (showRestartConfirm) {
+  <div class="backdrop">
+    <div class="modal">
+      <h3>Reiniciar Tema</h3>
+      <p>Ya completaste este tema. ¿Estás seguro de que quieres **reiniciarlo**? Perderás tu progreso actual si existía.</p>
+      <div class="modal-actions">
+        <button class="secondary" (click)="showRestartConfirm = false">Cancelar</button>
+        <button class="primary danger" (click)="restartTopic()">Reiniciar</button>
+      </div>
+    </div>
+  </div>
+}-->

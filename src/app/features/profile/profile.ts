@@ -8,6 +8,7 @@ import { RankingRow } from '../../core/models/ranking.model';
 import { BadgesPanel } from '../badges/badges-panel/badges-panel';
 import { Toast } from '../../core/toast';
 import { environment } from '../../../environments/environment';
+import { Api } from '../../core/api';
 
 @Component({
   selector: 'app-profile',
@@ -29,6 +30,7 @@ export class Profile implements OnInit, OnDestroy {
 
   private toast = inject(Toast);
   private shownKingToast = false; // evita repetir el toast en esta sesión de la vista
+  private api = inject(Api);
 
   msg = ''; err = ''; loading = false;
 
@@ -44,6 +46,9 @@ export class Profile implements OnInit, OnDestroy {
   // preview de avatar
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   avatarPreview: string | null = null;
+
+  avatarUrlResolved = 'assets/avatar-placeholder.png';
+  private avatarVer = Date.now();
 
   profileForm = this.fb.group({
     name: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(2)]],
@@ -70,16 +75,16 @@ export class Profile implements OnInit, OnDestroy {
 
   // === AVATAR PRINCIPAL (se muestra en la tarjeta izquierda) ===
   avatarSrc(me: any): string {
-    if (this.avatarPreview) return this.avatarPreview; // preview al subir
-    const u = (me?.avatarUrl || me?.avatar_url || '').trim();
-    const built = this.buildImgSrc(u);
-    return built || 'assets/avatar-placeholder.png';
+    if (this.avatarPreview) return this.avatarPreview;
+    const raw = (me?.avatarUrl || '').trim();
+    const abs = this.api.absolute(raw || '/media/avatars/default.png');
+    return abs ? `${abs}?v=${Date.now()}` : 'assets/avatar-placeholder.png';
   }
 
   // === AVATARES DEL RANKING (usa snake_case que viene del backend) ===
-  rankAvatarSrc(u?: string | null): string {
-    const built = this.buildImgSrc(u);
-    return built || 'assets/avatar-placeholder.png';
+  rankAvatarSrc(raw?: string | null): string {
+    const abs = this.api.absolute(raw || '/media/avatars/default.png');
+    return abs ? `${abs}?v=${Date.now()}` : 'assets/avatar-placeholder.png';
   }
 
   ngOnInit() {
@@ -101,6 +106,8 @@ export class Profile implements OnInit, OnDestroy {
         { emitEvent: false }
       );
 
+      
+
       // Si el alias aparece (o cambia), recarga ranking
       if (me.alias) {
         this.loadRanking();
@@ -110,12 +117,22 @@ export class Profile implements OnInit, OnDestroy {
         this.top100 = [];
         this.myOutside = null;
       }
+      this.avatarUrlResolved = this.resolveAvatar(me?.avatarUrl);
     });
-
     // Forzar refresco al abrir la vista para que me?.points esté al día
     this.auth.refreshMe().subscribe({
       error: () => {} // silencioso
     });
+  }
+
+  private resolveAvatar(raw?: string | null): string {
+    if (this.avatarPreview) return this.avatarPreview; // preview temporal
+
+    const u = (raw || '').trim();
+    // Usa tu helper Api.absolute para pegar base cuando sea relativo (/media/…)
+    const abs = this.api.absolute(u || '/media/avatars/default.png');
+    // cache-buster ESTABLE (no uses Date.now() aquí directamente)
+    return abs ? `${abs}?v=${this.avatarVer}` : 'assets/avatar-placeholder.png';
   }
 
   ngOnDestroy() { this.sub?.unsubscribe(); }
@@ -164,21 +181,28 @@ export class Profile implements OnInit, OnDestroy {
     if (!file) return;
 
     this.avatarPreview = URL.createObjectURL(file);
-    this.loading = true; this.msg=''; this.err='';
+    this.msg=''; this.err=''; this.loading = true;
 
     this.auth.uploadAvatar(file).subscribe({
       next: () => {
-        this.loading = false;
-        this.msg = 'Foto actualizada.';
+        // cuando el backend ya guardó la nueva ruta:
         this.avatarPreview = null;
-        input.value = '';
-        // Refresca /users/me para obtener la nueva ruta /media/avatars/...
+        this.avatarVer = Date.now();                // ← solo aquí la cambias
+        // refresca /users/me; el subscribe de arriba recalculará avatarUrlResolved
         this.auth.refreshMe().subscribe({
-          next: () => {
-            // nada: el async pipe se actualiza solo
+          next: (/*me*/) => {
+            // forzamos recomputar la url con el nuevo ver
+            // (si tu stream me$ ya emitió, bastará; por si acaso:)
+            this.me$.subscribe(me => {
+              this.avatarUrlResolved = this.resolveAvatar(me?.avatarUrl);
+            }).unsubscribe();
           },
           error: () => {}
         });
+
+        this.loading = false;
+        this.msg = 'Foto actualizada.';
+        input.value = '';
       },
       error: (e) => {
         this.loading = false;

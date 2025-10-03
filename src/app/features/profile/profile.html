@@ -11,7 +11,7 @@
       
       <div class="left">
         <div class="avatar-wrap">
-          <img [src]="avatarSrc(me)" alt="Foto de perfil" (error)="onImgError($event)">
+          <img [src]="avatarUrlResolved" alt="Foto de perfil" (error)="onImgError($event)">
           <button class="btn small" (click)="pickFile()" aria-label="Cambiar foto de perfil">Cambiar foto</button>
           <input #fileInput type="file" accept="image/*" (change)="onFileChange($event)" hidden>
         </div>

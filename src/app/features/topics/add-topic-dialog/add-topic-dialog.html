@@ -29,11 +29,10 @@
               title="Agregar este tema"
             >
               <img
-                [src]="t.coverUrl"
+                [src]="imgSrc(t.coverUrl)"
                 (error)="onImgError($event)"
                 alt=""
-                draggable="false"
-              >
+                draggable="false">
               <div class="title">{{ t.title }}</div>
             </div>
           }

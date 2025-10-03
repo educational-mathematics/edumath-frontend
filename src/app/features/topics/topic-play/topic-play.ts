@@ -410,9 +410,11 @@ export class TopicPlay {
   }
 
   exit() {
+    this.topics.save(this.sessionId, this.currentIndex, this.elapsedSec).subscribe({
+      complete: () => this.router.navigateByUrl('/home'),
+      error:    () => this.router.navigateByUrl('/home'),
+    });
     this.showExitConfirm = false;
-    this.saveNow();                // guarda índice + tiempo
-    this.router.navigateByUrl('/home');
   }
 
   goToHome(): void {

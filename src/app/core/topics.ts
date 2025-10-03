@@ -26,10 +26,10 @@ export class Topics {
   }
 
   save(sessionId: number, currentIndex: number, elapsedSec: number) {
-    return this.api.post(`${this.api}/topics/save/${sessionId}`, {
-      current_index: currentIndex,
-      elapsed_sec: elapsedSec
-    });
+        return this.api.post(
+      `/topics/save/${sessionId}`,
+      { current_index: currentIndex, elapsed_sec: elapsedSec }
+    );
   }
 
   exit(sessionId: number, elapsedSec: number) {

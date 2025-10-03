@@ -31,8 +31,8 @@
             </div>
           </div>
         }
-            @if (style === 'visual' && explanationImageUrl) {
-          <img [src]="explanationImageUrl" alt="" class="expimg"/>
+        @if (style === 'visual' && explanationImageUrl) {
+          <img [src]="explanationImageUrl.startsWith('/static') ? (apiBase + explanationImageUrl) : explanationImageUrl" alt="" class="expimg"/>
         }
         <p>{{ explanation }}</p>
       </div>
@@ -53,7 +53,7 @@
             }
             <div class="q">{{ it.question }}</div>
             @if (it.imageUrl) {
-              <img [src]="it.imageUrl" alt="" class="qimg" />
+              <img [src]="it.imageUrl?.startsWith('/static') ? (apiBase + it.imageUrl) : it.imageUrl" alt="" class="qimg" />
             }
             @for (c of it.choices; let i = $index; track i) {
               <label class="opt">

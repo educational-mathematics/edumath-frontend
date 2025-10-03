@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Topics } from '../../../core/topics';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 type VAK = 'visual'|'auditivo'|'kinestesico';
 type AudioState = 'loading' | 'stopped' | 'playing';
@@ -29,6 +30,8 @@ export class TopicPlay {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private topics = inject(Topics);
+
+  readonly apiBase = environment.apiUrl;
 
   userTopicId!: number;
   sessionId!: number;
@@ -71,6 +74,8 @@ export class TopicPlay {
   explanationImageUrl: string | null = null;
 
   showExitConfirm = false;
+
+  private autosaveTimer: any;
   //showRestartConfirm = false;
 
   // Inyectar el elemento de audio para la explicación
@@ -105,9 +110,18 @@ export class TopicPlay {
     //}
 
     this._load(res);
+    window.addEventListener('beforeunload', this.handleBeforeUnload);
   }
 
-  ngOnDestroy() { if (this.ticker) clearInterval(this.ticker); }
+  ngOnDestroy() {
+    if (this.ticker) clearInterval(this.ticker);
+    if (this.autosaveTimer) clearInterval(this.autosaveTimer);
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
+  }
+  private handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    this.saveNow();
+  };
+
   startTimer() { this.ticker = setInterval(() => this.elapsedSec++, 1000); }
 
   private _load(res: any) {
@@ -148,6 +162,13 @@ export class TopicPlay {
 
     this.prepareForItem();
     this.startTimer();
+    this.ready = true;
+    this.prepareForItem();
+    this.startTimer();
+
+    if (this.autosaveTimer) clearInterval(this.autosaveTimer);
+    this.autosaveTimer = setInterval(() => this.saveNow(), 15000); // cada 15s
+
     this.ready = true;
   }
 
@@ -343,6 +364,7 @@ export class TopicPlay {
       this.currentIndex = r.nextIndex;
       this.item = this.items[this.currentIndex];
       this.prepareForItem();
+      this.saveNow();
     });
   }
 
@@ -388,11 +410,23 @@ export class TopicPlay {
   }
 
   exit() {
-    this.showExitConfirm = false; // Cierra el modal de salida
+    this.showExitConfirm = false;
+    this.saveNow();                // guarda índice + tiempo
     this.router.navigateByUrl('/home');
   }
 
   goToHome(): void {
     this.router.navigateByUrl('/home');
+  }
+
+  private saveNow(): void {
+    try {
+      const idx = this.currentIndex ?? 0;
+      const time = this.elapsedSec ?? 0;
+      if (!this.sessionId) return;
+      this.topics.save(this.sessionId, idx, time).subscribe({
+        error: _ => {} // silencioso
+      });
+    } catch {}
   }
 }

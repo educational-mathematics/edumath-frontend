@@ -25,6 +25,13 @@ export class Topics {
     return this.api.post<any>(`/topics/slug/${slug}/open${q}`, {});
   }
 
+  save(sessionId: number, currentIndex: number, elapsedSec: number) {
+    return this.api.post(`${this.api}/topics/save/${sessionId}`, {
+      current_index: currentIndex,
+      elapsed_sec: elapsedSec
+    });
+  }
+
   exit(sessionId: number, elapsedSec: number) {
     return this.api.post<any>(`/topics/session/${sessionId}/exit`, { elapsedSec });
   }

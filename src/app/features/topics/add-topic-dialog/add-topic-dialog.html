@@ -18,17 +18,22 @@
           </button>
         }
       </div>
-
-      @if (catalog[selGrade].length) {
+      
+      @if ((catalog[selGrade] || []).length) {
         <div class="list">
-          @for (t of catalog[selGrade]; track t.id) {
+          @for (t of (catalog[selGrade] || []); track t.id) {
             <div
               class="item"
               [class.disabled]="isAdded(t)"
               (click)="pick(t)"
               title="Agregar este tema"
             >
-              <img [src]="t.coverUrl?.startsWith('/static') ? (apiBase + t.coverUrl) : t.coverUrl" draggable="false">
+              <img
+                [src]="t.coverUrl"
+                (error)="onImgError($event)"
+                alt=""
+                draggable="false"
+              >
               <div class="title">{{ t.title }}</div>
             </div>
           }
@@ -36,6 +41,7 @@
       } @else {
         <p class="empty">No hay temas disponibles para este grado.</p>
       }
+
     </div>
   </div>
 }

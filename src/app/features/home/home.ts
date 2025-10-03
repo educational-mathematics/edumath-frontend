@@ -45,7 +45,11 @@ export class Home {
     this.loaded = false;
     this.topics.myTopics().subscribe({
       next: list => {
-        this.items = list || [];
+        this.items = (list || []).map(t => ({
+          ...t,
+          // normaliza en front por si viene absoluta o relativa
+          coverUrl: this.resolveImg(t.coverUrl)
+        }));
         this.alreadyAddedIds = this.items.map(x => x.topicId);
         this.loaded = true;
       },
@@ -62,6 +66,19 @@ export class Home {
     });
   }
   onCancelAdd() { this.showAdd = false; }
+
+    resolveImg(u?: string | null): string | null {
+    if (!u) return null;
+    const s = u.trim();
+    if (s.startsWith('http://') || s.startsWith('https://')) return s;
+    if (s.startsWith('/media') || s.startsWith('/static')) return `${this.apiBase}${s}`;
+    // por compatibilidad con seeds antiguas (covers/..., avatars/..., badges/...)
+    if (s.startsWith('covers/') || s.startsWith('avatars/') || s.startsWith('badges/')) {
+      return `${this.apiBase}/media/${s}`;
+    }
+    // último recurso: asume relativo a /media
+    return `${this.apiBase}/media/${s.replace(/^\/+/, '')}`;
+  }
 
   enter(t: any) {
     if (!t?.userTopicId) return;
@@ -92,5 +109,19 @@ export class Home {
     this.showRestartConfirm = false;
     this.restartSlug = null;
     this.restartTitle = null;
+  }
+
+  onImgError(ev: Event) {
+    const img = ev.target as HTMLImageElement;
+    if ((img as any).__failedOnce) {
+      // segunda vez: oculta para no spamear la consola
+      img.style.visibility = 'hidden';
+      return;
+    }
+    (img as any).__failedOnce = true;
+    // si quieres fallback local, descomenta la línea de abajo y asegúrate de tener el asset
+    // img.src = 'assets/cover-fallback.png';
+    // si no quieres fallback, simplemente oculta:
+    img.style.visibility = 'hidden';
   }
 }

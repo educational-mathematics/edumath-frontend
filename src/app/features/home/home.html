@@ -17,7 +17,12 @@
     <div class="grid">
       @for (t of items; track t.userTopicId) {
         <div class="card" (click)="enter(t)">
-          <img [src]="t.coverUrl?.startsWith('/static') ? (apiBase + t.coverUrl) : t.coverUrl" draggable="false"> 
+          <img
+            [src]="t.coverUrl"
+            (error)="onImgError($event)"
+            alt=""
+            draggable="false"
+          >
           <div class="card-content">
             <div class="title">{{ t.title }}</div>
             <div class="progress-area">

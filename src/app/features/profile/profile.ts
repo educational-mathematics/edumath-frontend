@@ -7,6 +7,7 @@ import { Navbar } from '../../shared/components/navbar/navbar';
 import { RankingRow } from '../../core/models/ranking.model';
 import { BadgesPanel } from '../badges/badges-panel/badges-panel';
 import { Toast } from '../../core/toast';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -18,6 +19,7 @@ import { Toast } from '../../core/toast';
 export class Profile implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(Auth);
+  readonly apiBase = environment.apiUrl;
 
   // Stream del usuario
   me$ = this.auth.user$;
@@ -51,6 +53,34 @@ export class Profile implements OnInit, OnDestroy {
   aliasForm = this.fb.group({
     alias: [{ value: '', disabled: true }, [Validators.minLength(3), Validators.maxLength(32)]],
   });
+
+    // Devuelve una URL lista para <img>, con apiBase si viene relativa (/media/…)
+  private buildImgSrc(u?: string | null): string | null {
+    if (!u) return null;
+    const url = u.trim();
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // Relativa servida por backend
+    if (url.startsWith('/media/') || url.startsWith('/static/')) {
+      return this.apiBase + url;
+    }
+    // Último recurso: trátala como relativa de /media
+    return this.apiBase + '/media/' + url.replace(/^\/+/, '');
+  }
+
+  // === AVATAR PRINCIPAL (se muestra en la tarjeta izquierda) ===
+  avatarSrc(me: any): string {
+    if (this.avatarPreview) return this.avatarPreview; // preview al subir
+    const u = (me?.avatarUrl || me?.avatar_url || '').trim();
+    const built = this.buildImgSrc(u);
+    return built || 'assets/avatar-placeholder.png';
+  }
+
+  // === AVATARES DEL RANKING (usa snake_case que viene del backend) ===
+  rankAvatarSrc(u?: string | null): string {
+    const built = this.buildImgSrc(u);
+    return built || 'assets/avatar-placeholder.png';
+  }
 
   ngOnInit() {
     // Suscríbete al usuario para parchear formularios y cargar ranking al tener alias
@@ -127,22 +157,28 @@ export class Profile implements OnInit, OnDestroy {
   // Avatar
   pickFile() { this.fileInput?.nativeElement.click(); }
 
+  // Tras subir, fuerza refresh y rompe caché
   onFileChange(evt: Event) {
     const input = evt.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    // preview optimista
-    const url = URL.createObjectURL(file);
-    this.avatarPreview = url;
-
+    this.avatarPreview = URL.createObjectURL(file);
     this.loading = true; this.msg=''; this.err='';
+
     this.auth.uploadAvatar(file).subscribe({
       next: () => {
         this.loading = false;
         this.msg = 'Foto actualizada.';
         this.avatarPreview = null;
         input.value = '';
+        // Refresca /users/me para obtener la nueva ruta /media/avatars/...
+        this.auth.refreshMe().subscribe({
+          next: () => {
+            // nada: el async pipe se actualiza solo
+          },
+          error: () => {}
+        });
       },
       error: (e) => {
         this.loading = false;
@@ -151,11 +187,8 @@ export class Profile implements OnInit, OnDestroy {
         input.value = '';
       }
     });
-    //desaparecer alerta
-    setTimeout(() => {
-      this.msg = '';
-      this.err = '';
-    }, 3000);
+
+    setTimeout(() => { this.msg = ''; this.err = ''; }, 3000);
   }
 
   // ------ Alias / Ranking ------
@@ -214,7 +247,7 @@ export class Profile implements OnInit, OnDestroy {
           if (!this.shownKingToast && inTop.rank === 1 && (inTop.points ?? 0) > 1000) {
             this.toast.success('¡Insignia obtenida: El Rey!', {
               message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
-              imageUrl: '/static/badges/king.png',
+              imageUrl: this.apiBase + '/media/badges/king.png',
               timeoutMs: 3000,
             });
             this.shownKingToast = true;
@@ -236,17 +269,6 @@ export class Profile implements OnInit, OnDestroy {
           next: (meRow) => {
             if (meRow && meRow.rank && meRow.rank > 100) this.myOutside = meRow;
             else this.myOutside = null;
-
-            // Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
-            //if (!this.shownKingToast && meRow && meRow.rank === 1 && (meRow.points ?? 0) > 1000) {
-              //this.toast.success('¡Insignia obtenida: El Rey!', {
-                //message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
-                //imageUrl: 'assets/king.png',
-                //timeoutMs: 3000,
-              //});
-              //this.shownKingToast = true;
-              //this.auth.refreshMe().subscribe({ error: () => {} });
-            //}
           },
           error: () => { this.myOutside = null; }
         });
@@ -258,13 +280,7 @@ export class Profile implements OnInit, OnDestroy {
       }
     });
   }
-
-  avatarSrc(me: any): string {
-    if (this.avatarPreview) return this.avatarPreview;
-    const u = (me?.avatarUrl || '').trim();
-    return u || 'assets/avatar-placeholder.png';
-  }
-
+  
   onImgError(ev: Event) {
     (ev.target as HTMLImageElement).src = 'assets/avatar-placeholder.png';
   }

@@ -1,0 +1,18 @@
+@if (show) {
+  <div class="overlay" aria-live="polite">
+    <div class="card">
+      <div class="img-wrap">
+            <img src="assets/loading.png" alt="Cargando..." draggable="false" />
+      </div>
+
+      <h3 class="headline">{{ headline || 'Un momento, estamos creando tu sesión...' }}</h3>
+      <p class="subline">{{ subline || 'Esto puede tomar unos segundos mientras la IA genera el contenido.' }}</p> 
+      <div class="spinner" aria-hidden="true"></div> 
+      @if (currentTip) {
+        <div class="tip">
+          💡 {{ currentTip }}
+        </div>
+      }
+    </div>
+  </div>
+}

@@ -267,3 +267,8 @@ h1 {
   color: #1976d2;
   font-weight: 700;
 }
+
+.hint { margin-top: 6px; font-size: 12px; line-height: 1.2; }
+.hint.error { color: #dc2626; }   /* rojo */
+.hint.ok    { color: #16a34a; }   /* verde */
+input.invalid { border-color: #dc2626; }

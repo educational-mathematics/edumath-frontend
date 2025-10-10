@@ -1,0 +1,64 @@
+.overlay{
+ position: fixed; 
+ inset: 0; 
+ background: #f8fafc; /* Fondo de un solo color claro (slate-50) */
+ color: #1e293b; /* Texto oscuro y legible */
+ display: flex; 
+ align-items: center; 
+ justify-content: center; 
+ z-index: 9999;
+}
+.card{
+ width: min(680px, 92vw); 
+ text-align: center; 
+ padding: 40px 30px; /* Más padding para centrado visual */
+ background: #ffffff; /* Fondo blanco */
+ border: 1px solid #e2e8f0; /* Borde muy sutil */
+ border-radius: 24px; /* Bordes más suaves */
+ box-shadow: 0 15px 40px rgba(0,0,0,0.1); /* Sombra más suave y notable */
+}
+.img-wrap{ 
+ display: flex; 
+ align-items: center; 
+ justify-content: center; 
+ margin-bottom: 24px; /* Más espacio */
+}
+.img-wrap img{ 
+ width: 220px; /* Imagen lo suficientemente grande */
+ height: 220px; 
+ object-fit: contain; 
+ /* Eliminamos el filtro de sombra oscura para el fondo claro */
+}
+.headline{ 
+ margin: 0 0 8px; 
+ font-size: 26px; /* Más grande */
+ font-weight: 800; /* Más prominente */
+ color: #1e40af; /* Azul oscuro para el título */
+}
+.subline{ 
+ margin: 0 0 20px; 
+ opacity: 0.85;
+ font-size: 16px;
+ color: #475569;
+}
+.spinner{
+ margin: 20px auto 20px; /* Centrado y más espacio vertical */
+ width: 40px; /* Un poco más grande */
+ height: 40px; 
+ border-radius: 50%;
+ border: 5px solid rgba(0,0,0,.1); /* Gris claro */
+ border-top-color: #10b981; /* Verde brillante (o un color vibrante) */
+ animation: spin 1s linear infinite;
+}
+.tip{ 
+ margin-top: 15px; 
+ font-size: 15px; 
+ padding: 8px 15px;
+ background: #f0f9ff; /* Fondo sutil para el tip */
+ border-radius: 12px;
+ color: #475569;
+ font-weight: 500;
+}
+@keyframes spin { 
+ to { transform: rotate(360deg); } 
+}

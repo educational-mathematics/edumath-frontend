@@ -1,3 +1,11 @@
+<app-loading-overlay
+  [show]="loading"
+  [imageUrl]="'assets/loading-bot.png'"
+  [headline]="'Estoy trabajando en esto…'"
+  [subline]="'La primera vez puede tomar unos minutos.'"
+  [tips]="tipsSvc.default">
+</app-loading-overlay>
+
 @if (ready) {
   <div class="wrap">
     <div class="header">

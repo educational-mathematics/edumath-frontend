@@ -3,8 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Topics } from '../../../core/topics';
-import { firstValueFrom } from 'rxjs';
+import { finalize, firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { LoadingOverlay } from '../../../shared/components/loading-overlay/loading-overlay';
+import { Tips } from '../../../core/tips';
 
 type VAK = 'visual'|'auditivo'|'kinestesico';
 type AudioState = 'loading' | 'stopped' | 'playing';
@@ -22,7 +24,7 @@ interface Confetto {
 
 @Component({
   selector: 'app-topic-play',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoadingOverlay],
   templateUrl: './topic-play.html',
   styleUrl: './topic-play.css'
 })
@@ -78,6 +80,9 @@ export class TopicPlay {
   private autosaveTimer: any;
   //showRestartConfirm = false;
 
+  tipsSvc = inject(Tips);
+  loading = false;
+
   // Inyectar el elemento de audio para la explicación
   @ViewChild('ttsAudio', { static: false }) ttsAudioRef!: ElementRef<HTMLAudioElement>;
   // Inyectar el elemento de audio para la pregunta (MCQ)
@@ -89,28 +94,21 @@ export class TopicPlay {
   async ngOnInit() {
     const slug = this.route.snapshot.paramMap.get('slug')!;
     const reset = this.route.snapshot.queryParamMap.get('reset') === '1';
-    const res = await firstValueFrom(this.topics.openBySlug(slug, reset));
+    //const res = await firstValueFrom(this.topics.openBySlug(slug, reset));
 
-    // ¿llegó con ?restart=1? -> reinicia directo
-    //const qp = this.route.snapshot.queryParamMap;
-    //const wantsRestart = qp.get('restart') === '1';
-//
-    //if (wantsRestart) {
-    //  const r2 = await firstValueFrom(this.topics.openBySlug(slug, true));
-    //  this._load(r2);
-    //  return;
-    //}
-//
-    //if (res.alreadyCompleted) {
-    //  // manda al home con datos para modal
-    //  this.router.navigate(['/home'], {
-    //    state: { restartSlug: slug, restartTitle: res.title }
-    //  });
-    //  return;
-    //}
+    this.loading = true;
+    try {
+      const res = await firstValueFrom(
+        this.topics.openBySlug(slug, reset)
+      );
+      this._load(res);
+      window.addEventListener('beforeunload', this.handleBeforeUnload);
+    } finally {
+      this.loading = false;
+    }
 
-    this._load(res);
-    window.addEventListener('beforeunload', this.handleBeforeUnload);
+    //this._load(res);
+    //window.addEventListener('beforeunload', this.handleBeforeUnload);
   }
 
   ngOnDestroy() {

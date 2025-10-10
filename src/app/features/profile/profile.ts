@@ -33,6 +33,8 @@ export class Profile implements OnInit, OnDestroy {
   private api = inject(Api);
 
   msg = ''; err = ''; loading = false;
+  aliasError = '';
+  aliasSuccess = '';
 
   // estados de edición
   editingName = false;
@@ -227,29 +229,42 @@ export class Profile implements OnInit, OnDestroy {
     // Reset al valor actual del stream
     const me = await firstValueFrom(this.me$);
     this.aliasForm.controls.alias.setValue(me?.alias ?? '');
+    this.aliasError = '';
+    this.aliasSuccess = '';
   }
   saveAlias() {
-    const alias = (this.aliasForm.getRawValue().alias || '').toString().trim();
-    if (!alias) { this.err = 'El alias no puede estar vacío.'; return; }
-    this.loading = true; this.msg=''; this.err='';
+    const ctrl = this.aliasForm.controls.alias;
+    const alias = (ctrl.getRawValue() || '').toString().trim();
+
+    // limpia mensajes previos solo del bloque de alias
+    this.aliasError = '';
+    this.aliasSuccess = '';
+
+    if (!alias) {
+      this.aliasError = 'El alias no puede estar vacío.';
+      ctrl.markAsTouched();
+      return;
+    }
+
+    this.loading = true;
+
     this.auth.setAlias(alias).subscribe({
       next: () => {
         this.loading = false;
-        this.msg = 'Alias actualizado.';
-        this.cancelEditAlias();
-        // user$ disparará loadRanking si hace falta
+        this.aliasSuccess = 'Alias actualizado.';
+        this.cancelEditAlias();                 // cierra el modo edición
+        setTimeout(() => (this.aliasSuccess = ''), 3000); // opcional
       },
       error: (e) => {
         this.loading = false;
-        this.err = (e?.status === 409) ? 'Ese alias ya está en uso.' : (e?.error?.detail || 'No se pudo actualizar el alias.');
+        this.aliasError =
+          e?.status === 409
+            ? 'Ese alias ya está en uso.'
+            : (e?.error?.detail || 'No se pudo actualizar el alias.');
+        // deja el campo en edición para que el usuario corrija
+        setTimeout(() => (this.aliasError = ''), 3000);
       }
     });
-
-    //desaparecer alerta
-    setTimeout(() => {
-      this.msg = '';
-      this.err = '';
-    }, 3000);
   }
 
   loadRanking() {

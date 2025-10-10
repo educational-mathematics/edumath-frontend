@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Navbar } from '../../shared/components/navbar/navbar';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
   templateUrl: './settings.html',
   styleUrls: ['./settings.css']
 })
-export class Settings {
+export class Settings implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(Auth);
   private router = inject(Router);
@@ -28,6 +28,19 @@ export class Settings {
   // Seguridad
   locked = true;
   unlockModalOpen = false;
+
+  ngOnInit(): void {
+    this.syncLockState(); // bloqueado al inicio
+  }
+
+  private syncLockState() {
+    if (this.locked) {
+      this.securityForm.disable({ emitEvent: false });
+    } else {
+      this.securityForm.enable({ emitEvent: false });
+    }
+  }
+
 
   securityForm = this.fb.group({
     // current va en el modal, no en el form principal
@@ -59,6 +72,7 @@ export class Settings {
       await this.auth.checkPassword(this.unlockForm.value.current!).toPromise();
       this.unlockModalOpen = false;
       this.locked = false;
+      this.syncLockState();
     } catch (e: any) {
       this.err = e?.error?.detail || 'Contraseña incorrecta.';
     } finally {
@@ -68,6 +82,7 @@ export class Settings {
   relock() {
     this.locked = true;
     this.securityForm.reset();
+    this.syncLockState();
     this.clearMsgs();
   }
 

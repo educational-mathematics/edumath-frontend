@@ -24,13 +24,12 @@
             {{ loading ? 'Registrando...' : 'Registrarse' }}</button>
         </form>
 
-        <!-- Notificación flotante con @if
         @if (showNotification) {
         <div class="notification" [class.success]="notificationType === 'success'" [class.error]="notificationType === 'error'">
             <span>{{ notificationMessage }}</span>
             <button (click)="closeNotification()">✖</button>
         </div>
-        }-->
+        }
     </mat-card-content>
 
     <mat-card-actions class="login-link-container">

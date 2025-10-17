@@ -146,7 +146,7 @@ export class TopicPlay {
       fetch('http://localhost:8000/ai/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: this.explanation, voice: 'es-ES-Neural2-A' })
+        body: JSON.stringify({ text: this.explanation, voice: 'es-ES-Standard-A' })
       })
         .then(async r => r.status === 204 ? null : r.blob())
         .then(b => { this.ttsUrl = b ? URL.createObjectURL(b) : null;

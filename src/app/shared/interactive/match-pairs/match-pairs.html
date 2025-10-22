@@ -1,0 +1,29 @@
+<div class="pairs-root" cdkDropListGroup>
+  <div class="col">
+    <div class="col-title">
+      <mat-icon>label</mat-icon> Columna A
+    </div>
+    <div class="list" cdkDropList [cdkDropListData]="left()" (cdkDropListDropped)="dropped($event, 'left')">
+      @for (it of left(); track it) {
+        <div class="card" cdkDrag tabindex="0">{{ it }}</div>
+      }
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="col-title">
+      <mat-icon>label_important</mat-icon> Columna B
+    </div>
+    <div class="list" cdkDropList [cdkDropListData]="right()" (cdkDropListDropped)="dropped($event, 'right')">
+      @for (it of right(); track it) {
+        <div class="card" cdkDrag tabindex="0">{{ it }}</div>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="hint">Arrastra tarjetas desde <b>Columna B</b> y suéltalas frente a la frase correcta en <b>Columna A</b>.</div>
+
+<div class="actions">
+  <button class="primary" (click)="submit()">Comprobar</button>
+</div>

@@ -1,0 +1,74 @@
+<div class="drag-root" cdkDropListGroup>
+  <div class="pool">
+    <div class="pool-title">
+      <mat-icon>inventory_2</mat-icon>
+      Tarjetas
+    </div>
+
+    <div
+      class="pool-list"
+      cdkDropList
+      [cdkDropListData]="pool()"
+      (cdkDropListDropped)="dropped($event)"
+    >
+      @for (it of pool(); track it) {
+        <div class="card" cdkDrag tabindex="0">{{ it }}</div>
+      }
+      @if (pool().length === 0 && !noItems()) {
+        <div class="empty-hint">Arrastra las tarjetas a un bucket.</div>
+      }
+    </div>
+
+    <div class="status">{{ placedCount() }}/{{ totalCount() }} ubicadas</div>
+  </div>
+
+  <div class="buckets">
+    @for (b of safeBuckets(); track b) {
+      <div class="bucket">
+        <div class="bucket-title">
+          <mat-icon>inbox</mat-icon>
+          {{ b }}
+        </div>
+
+        <div
+          class="bucket-list"
+          cdkDropList
+          [cdkDropListData]="bucketMap()[b] || []"
+          (cdkDropListDropped)="dropped($event)"
+        >
+          @for (it of (bucketMap()[b] || []); track it) {
+            <div class="card" cdkDrag tabindex="0">{{ it }}</div>
+          }
+          @if (bucketMap()[b].length === 0) {
+            <div class="empty-hint subtle">Vacío</div>
+          }
+        </div>
+
+        <!-- Accesible: mover por clic, además del drag 
+        <div class="bucket-actions">
+          @for (it of pool(); track it) {
+            <button class="mini" (click)="move(it, b)">Enviar “{{ it }}” aquí</button>
+          }
+        </div>-->
+      </div>
+    }
+  </div>
+</div>
+
+<div class="actions">
+  <button
+    class="primary"
+    [disabled]="noItems() || placedCount() < totalCount()"
+    (click)="submit()"
+  >
+    Comprobar
+  </button>
+
+  <!--<button class="secondary" (click)="moveAllToPool()">Reiniciar</button>-->
+</div>
+
+@if (noItems()) {
+  <div class="noitems-banner">
+    Este ejercicio no contiene tarjetas. Si esto persiste, avísanos.
+  </div>
+}

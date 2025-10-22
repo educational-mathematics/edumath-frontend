@@ -51,85 +51,93 @@
       <section>
         <div class="qhead">Ejercicio {{ currentIndex + 1 }} / 10</div>
 
-        @if (it.type === 'multiple_choice') {
-          <div class="mcq">
-            @if (it.ttsUrl) {
-              <audio [src]="it.ttsUrl" controls #questionAudio style="display: none;"></audio>
-              <button class="play-button" (click)="toggleQuestionAudio()">
-                <span>🔊 Escuchar pregunta</span>
-              </button>
-            }
-            <div class="q">{{ it.question }}</div>
-            @if (it.imageUrl) {
-              <img [src]="it.imageUrl?.startsWith('/static') ? (apiBase + it.imageUrl) : it.imageUrl" alt="" class="qimg" />
-            }
-            @for (c of it.choices; let i = $index; track i) {
-              <label class="opt">
-                <input
-                  type="radio"
-                  name="mcq"
-                  [value]="i"
-                  [(ngModel)]="mcqAnswer"
-                  (change)="lastCorrect=null; feedback=null"
-                />
-                {{ c }}
-              </label>
-            }
-            <div class="actions">
-              <button class="primary" (click)="submit(mcqAnswer)">Responder</button>
-            </div>
-          </div>
-        }
-        
-        @if (it.type === 'match_pairs') {
-          <div class="pairs">
-            <div class="q">{{ it.title || 'Empareja' }}</div>
-            @for (L of lefts; let i = $index; track i) {
-              <div class="row">
-                <span class="left">{{ L }}</span>
-                <select [(ngModel)]="pairAnswer[i]">
-                  @for (R of rights; track R) {
-                    <option [value]="R">{{ R }}</option>
-                  }
-                </select>
-              </div>
-            }
-            <button class="primary" (click)="submitPairs()">Responder</button>
-          </div>
-        }
+        @if (style === 'kinestesico') {
+          <app-activity-renderer
+            [item]="it"
+            (answer)="onKinestheticAnswer($event)">
+          </app-activity-renderer>
+        } @else {
 
-        @if (it.type === 'drag_to_bucket') {
-          <div class="buckets">
-            <div class="q">{{ it.title || 'Clasifica fracciones' }}</div>
-          
-            <table class="bucket-matrix">
-              <thead>
-                <tr>
-                  <th>Ítem</th>
-                  @for (b of it.buckets; track b) { <th>{{ b }}</th> }
-                </tr>
-              </thead>
-              <tbody>
-                @for (x of it.items; track x) {
-                  <tr>
-                    <td>{{ x }}</td>
-                    @for (b of it.buckets; track b) {
-                      <td class="center">
-                        <input
-                          type="radio"
-                          [name]="'bucket-'+x"
-                          [value]="b"
-                          [checked]="bucketChoice[x] === b"
-                          (change)="chooseBucket(x, b)"
-                        />
-                      </td>
+          @if (it.type === 'multiple_choice') {
+            <div class="mcq">
+              @if (it.ttsUrl) {
+                <audio [src]="it.ttsUrl" controls #questionAudio style="display: none;"></audio>
+                <button class="play-button" (click)="toggleQuestionAudio()">
+                  <span>🔊 Escuchar pregunta</span>
+                </button>
+              }
+              <div class="q">{{ it.question }}</div>
+              @if (it.imageUrl) {
+                <img [src]="it.imageUrl?.startsWith('/static') ? (apiBase + it.imageUrl) : it.imageUrl" alt="" class="qimg" />
+              }
+              @for (c of it.choices; let i = $index; track i) {
+                <label class="opt">
+                  <input
+                    type="radio"
+                    name="mcq"
+                    [value]="i"
+                    [(ngModel)]="mcqAnswer"
+                    (change)="lastCorrect=null; feedback=null"
+                  />
+                  {{ c }}
+                </label>
+              }
+              <div class="actions">
+                <button class="primary" (click)="submit(mcqAnswer)">Comprobar</button>
+              </div>
+            </div>
+          }
+
+          @if (it.type === 'match_pairs') {
+            <div class="pairs">
+              <div class="q">{{ it.title || 'Empareja' }}</div>
+              @for (L of lefts; let i = $index; track i) {
+                <div class="row">
+                  <span class="left">{{ L }}</span>
+                  <select [(ngModel)]="pairAnswer[i]">
+                    @for (R of rights; track R) {
+                      <option [value]="R">{{ R }}</option>
                     }
+                  </select>
+                </div>
+              }
+              <button class="primary" (click)="submitPairs()">Comprobar</button>
+            </div>
+          }
+
+          @if (it.type === 'drag_to_bucket') {
+            <div class="buckets">
+              <div class="q">{{ it.title || 'Clasifica fracciones' }}</div>
+            
+              <table class="bucket-matrix">
+                <thead>
+                  <tr>
+                    <th>Ítem</th>
+                    @for (b of it.buckets; track b) { <th>{{ b }}</th> }
                   </tr>
-                }
-              </tbody>
-            </table>
-            <button class="primary" (click)="submitBuckets()">Responder</button>
-          </div>
+                </thead>
+                <tbody>
+                  @for (x of it.items; track x) {
+                    <tr>
+                      <td>{{ x }}</td>
+                      @for (b of it.buckets; track b) {
+                        <td class="center">
+                          <input
+                            type="radio"
+                            [name]="'bucket-'+x"
+                            [value]="b"
+                            [checked]="bucketChoice[x] === b"
+                            (change)="chooseBucket(x, b)"
+                          />
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <button class="primary" (click)="submitBuckets()">Comprobar</button>
+            </div>
+          }
         }
 
         @if (feedback !== null || lastCorrect !== null) {

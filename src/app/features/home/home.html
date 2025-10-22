@@ -31,6 +31,13 @@
               </div>
               <div class="pct">{{ t.progressPct }}%</div>
             </div>
+
+            <div class="completed-row">
+              <span class="dot done"></span>
+              <span class="completed-text">
+                Completado {{ t.completedCount || 0 }} {{ (t.completedCount || 0) === 1 ? 'vez' : 'veces' }}
+              </span>
+            </div>
           </div>
         </div>
       }

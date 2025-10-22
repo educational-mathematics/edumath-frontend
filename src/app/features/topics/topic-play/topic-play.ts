@@ -7,6 +7,8 @@ import { finalize, firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { LoadingOverlay } from '../../../shared/components/loading-overlay/loading-overlay';
 import { Tips } from '../../../core/tips';
+import { ActivityRenderer } from '../../../shared/interactive/activity-renderer/activity-renderer';
+import { A } from '@angular/cdk/keycodes';
 
 type VAK = 'visual'|'auditivo'|'kinestesico';
 type AudioState = 'loading' | 'stopped' | 'playing';
@@ -24,7 +26,7 @@ interface Confetto {
 
 @Component({
   selector: 'app-topic-play',
-  imports: [CommonModule, FormsModule, LoadingOverlay],
+  imports: [CommonModule, FormsModule, LoadingOverlay, ActivityRenderer],
   templateUrl: './topic-play.html',
   styleUrl: './topic-play.css'
 })
@@ -83,6 +85,8 @@ export class TopicPlay {
   tipsSvc = inject(Tips);
   loading = false;
 
+  private kinLock = false;
+
   // Inyectar el elemento de audio para la explicación
   @ViewChild('ttsAudio', { static: false }) ttsAudioRef!: ElementRef<HTMLAudioElement>;
   // Inyectar el elemento de audio para la pregunta (MCQ)
@@ -123,6 +127,11 @@ export class TopicPlay {
   startTimer() { this.ticker = setInterval(() => this.elapsedSec++, 1000); }
 
   private _load(res: any) {
+    // limpia timers previos
+    if (this.ticker) clearInterval(this.ticker);
+    if (this.autosaveTimer) clearInterval(this.autosaveTimer);
+    this.ready = false;
+
     this.sessionId = res.sessionId;
     this.title = res.title;
     this.style = res.style as VAK;
@@ -131,17 +140,10 @@ export class TopicPlay {
     this.currentIndex = res.currentIndex || 0;
     this.item = this.items[this.currentIndex] || null;
 
-    // Audio (auditorio)
     this.ttsUrl = res.explanationAudioUrl || null;
-
-    if (this.ttsUrl) {
-      this.audioState = 'loading';
-    }
-
-    // Imagen (visual). Acepta ambos nombres para compatibilidad:
     this.explanationImageUrl = res.explanationImageUrl || null;
 
-    if (this.style === 'auditivo' && this.explanation) {
+    if (this.style === 'auditivo' && this.explanation && !this.ttsUrl) {
       this.audioState = 'loading';
       fetch('http://localhost:8000/ai/tts', {
         method: 'POST',
@@ -149,23 +151,15 @@ export class TopicPlay {
         body: JSON.stringify({ text: this.explanation, voice: 'es-ES-Standard-A' })
       })
         .then(async r => r.status === 204 ? null : r.blob())
-        .then(b => { this.ttsUrl = b ? URL.createObjectURL(b) : null;
-                this.audioState = 'stopped';
-              })
-        .catch(() => {
-          this.ttsUrl = null;
-          this.audioState = 'stopped';
-        });
+        .then(b => { this.ttsUrl = b ? URL.createObjectURL(b) : null; this.audioState = 'stopped'; })
+        .catch(() => { this.ttsUrl = null; this.audioState = 'stopped'; });
     }
 
     this.prepareForItem();
     this.startTimer();
-    this.ready = true;
-    this.prepareForItem();
-    this.startTimer();
 
-    if (this.autosaveTimer) clearInterval(this.autosaveTimer);
-    this.autosaveTimer = setInterval(() => this.saveNow(), 15000); // cada 15s
+    // autosave solo con sessionId válido
+    this.autosaveTimer = setInterval(() => this.saveNow(), 15000);
 
     this.ready = true;
   }
@@ -202,6 +196,32 @@ export class TopicPlay {
     } else {
       audio.pause();
     }
+  }
+
+  onKinestheticAnswer(payload: { value: any; isComplete: boolean }) {
+    if (!payload?.isComplete || this.kinLock) return;
+    this.kinLock = true;
+    
+    this.topics.answer(this.sessionId, this.currentIndex, payload.value).subscribe({
+      next: r => {
+        this.lastCorrect = r.correct;
+        this.feedback = r.feedback;
+      
+        if (!r.correct) { this.kinLock = false; return; }
+      
+        if (r.finished === true || r.nextIndex >= this.items.length) {
+          this.doFinishFlow();
+          return;
+        }
+      
+        this.currentIndex = r.nextIndex;
+        this.item = this.items[this.currentIndex];
+        this.prepareForItem();
+        this.saveNow();
+        this.kinLock = false;
+      },
+      error: _ => { this.kinLock = false; }
+    });
   }
 
   prepareForItem() {
@@ -421,12 +441,10 @@ export class TopicPlay {
 
   private saveNow(): void {
     try {
+      if (!this.ready || !this.sessionId) return;   // ← evita POST /topics/save/ID viejo
       const idx = this.currentIndex ?? 0;
       const time = this.elapsedSec ?? 0;
-      if (!this.sessionId) return;
-      this.topics.save(this.sessionId, idx, time).subscribe({
-        error: _ => {} // silencioso
-      });
+      this.topics.save(this.sessionId, idx, time).subscribe({ error: _ => {} });
     } catch {}
   }
 }

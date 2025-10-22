@@ -139,7 +139,21 @@ section {
     accent-color: #1976d2;
 }
 
-.actions { margin-top: 20px; text-align: right; }
+.actions { margin-top: 12px; text-align: right; }
+.actions .primary {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(59,130,246,.25);
+}
+.actions .primary:disabled {
+  background: #93c5fd;
+  box-shadow: none;
+  cursor: not-allowed;
+}
 
 /* Emparejamiento (Match Pairs) */
 .pairs .row { 

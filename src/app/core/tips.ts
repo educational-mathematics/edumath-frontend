@@ -24,12 +24,13 @@ export class Tips {
     'Kimi fue creado en un tablero de Miro.',
     'Ya no se ques poner aquí, pero sigue apareciendo este tip.',
     '¿Sabías que elimine el cambio de tema oscuro porque me daba pereza hacerlo bien?',
-    'Usamos Gemini AI para generar las explicaciones, ejercicios, audios e imágenes.',
+    'Usamos Gemini-2.5-flash para generar las explicaciones, ejercicios, audios e imágenes...o al menos la primera vez...',
     'Este tip es solo para que veas que hay muchos tips en esta aplicación.',
+    'Si hay algún error, por favor recarga la página e inténtalo de nuevo, o contactanos.',
     'Among Us',
     '¿Por qué los libros de matemáticas siempre están tristes? Porque tienen muchos problemas.',
     '¿Qué le dijo el número 0 al número 8? ¡Bonito cinturón!',
-    'Hay un secreto en "Configuración"',
+    'פרחים',
     'La paciencia es una virtud.'
   ];
 }

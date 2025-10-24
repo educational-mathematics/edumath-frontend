@@ -79,6 +79,35 @@
       </section>
     }
 
+    @if (showStylePicker && !showResults) {
+      <section class="card">
+        <h2 class="card-title">Empate detectado</h2>
+      
+        <p class="mb-2">
+          El puntaje quedó empatado entre: <strong>{{ tiedText }}</strong>.
+          Elige tu preferencia para continuar:
+        </p>
+      
+        <div class="style-grid">
+          @for (s of tiedStyles; track s) {
+            <label class="style-option">
+              <input type="radio" name="pick" [(ngModel)]="selectedStyle" [value]="s" />
+              <div>
+                <strong>{{ styleLabel(s) }}</strong>
+                <div class="desc">{{ styleDesc(s) }}</div>
+              </div>
+            </label>
+          }
+        </div>
+      
+        <div class="nav">
+          <button class="btn primary" [disabled]="!selectedStyle" (click)="confirmPreferredStyle()">
+            Confirmar estilo
+          </button>
+        </div>
+      </section>
+    }
+
     <!-- Resultados -->
     @if (showResults && resultStyle && resultScores) {
       <section class="card results-card">

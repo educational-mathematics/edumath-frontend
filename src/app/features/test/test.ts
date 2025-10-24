@@ -39,6 +39,14 @@ export class Test {
   resultStyle: VAK | null = null;
   resultScores: { visual: number; auditivo: number; kinestesico: number } | null = null;
 
+  showStylePicker = false;
+  selectedStyle: VAK | null = null;
+
+  tiedStyles: VAK[] = [];    // estilos empatados
+  tiedText = '';             // texto “Visual y Auditivo”, etc.
+
+  private pendingTotals?: { visual:number; auditivo:number; kinestesico:number };
+
   // canvas para confetti
   @ViewChild('confettiCanvas') confettiCanvasRef?: ElementRef<HTMLCanvasElement>;
   private confettiTimer?: any;
@@ -81,8 +89,33 @@ export class Test {
       const val = this.answers[q.id] ?? 0;
       totals[q.type] += val;
     }
-    const vakStyle = (Object.entries(totals).sort((a,b)=>b[1]-a[1])[0][0]) as VAK;
 
+    const order: VAK[] = ['visual','auditivo','kinestesico'];
+    const vals = [totals.visual, totals.auditivo, totals.kinestesico];
+    const max = Math.max(...vals);
+    const winners: VAK[] = order.filter((k,i) => vals[i] === max);
+    const allZero = vals.every(v => v === 0);
+
+    if (allZero || winners.length >= 2) {
+      // Solo muestra los empatados
+      this.pendingTotals = totals;
+      this.tiedStyles = (allZero ? order : winners);
+      this.tiedText = this.humanList(this.tiedStyles.map(s => this.styleLabel(s)));
+      this.selectedStyle = null;
+      this.showStylePicker = true;   // ← abre el selector con SOLO empatados
+      return;
+    }
+
+    // Ganador único
+    const vakStyle = winners[0];
+    this.persistAndShow(vakStyle, totals);
+  }
+
+  goHome() {
+    this.router.navigateByUrl('/home');
+  }
+
+  private persistAndShow(vakStyle: VAK, totals: {visual:number;auditivo:number;kinestesico:number}) {
     this.auth.updateUser({
       vakStyle,
       vakScores: totals,
@@ -90,9 +123,7 @@ export class Test {
       testDate: new Date().toISOString(),
     })
     .pipe(
-      // marca primer login (esto ya muestra el toast y refresca user)
       switchMap(() => this.auth.markFirstLoginDone()),
-      // ⚠️ elimina el tap anterior que leía res.awardedBadges y mostraba otro toast
       switchMap(() => this.auth.refreshMe()),
     )
     .subscribe({
@@ -100,20 +131,41 @@ export class Test {
         this.resultScores = totals;
         this.resultStyle = vakStyle;
         this.showResults = true;
+        this.showStylePicker = false;
         setTimeout(() => this.runConfetti(), 50);
       },
       error: () => {
         this.resultScores = totals;
         this.resultStyle = vakStyle;
         this.showResults = true;
+        this.showStylePicker = false;
         setTimeout(() => this.runConfetti(), 50);
         this.toast.error('No se pudo marcar el primer ingreso', { timeoutMs: 2500 });
       }
     });
   }
 
-  goHome() {
-    this.router.navigateByUrl('/home');
+  confirmPreferredStyle() {
+    if (!this.selectedStyle || !this.pendingTotals) return;
+    this.persistAndShow(this.selectedStyle, this.pendingTotals);
+  }
+  
+  styleLabel(s: VAK): string {
+    return s === 'visual' ? 'Visual' : s === 'auditivo' ? 'Auditivo' : 'Kinestésico';
+  }
+
+  styleDesc(s: VAK): string {
+    switch (s) {
+      case 'visual': return 'Aprendes mejor con imágenes, diagramas y ejemplos vistos.';
+      case 'auditivo': return 'Prefieres escuchar explicaciones y repetir en voz alta.';
+      case 'kinestesico': return 'Aprendes haciendo: manipular, mover, experimentar.';
+    }
+  }
+
+  private humanList(xs: string[]): string {
+    if (xs.length <= 1) return xs[0] ?? '';
+    if (xs.length === 2) return `${xs[0]} y ${xs[1]}`;
+    return `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}`;
   }
 
   // ====== Confetti ligero sin librerías =======

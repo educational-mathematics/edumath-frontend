@@ -7,6 +7,7 @@ export interface AssistantTopicInfo {
   grade: number;
   slug: string;
   title: string;
+  coverUrl?: string;
 }
 
 export interface Paragraph {

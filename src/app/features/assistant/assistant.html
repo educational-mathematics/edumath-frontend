@@ -1,2 +1,137 @@
 <app-navbar></app-navbar>
-<p>assistant works!</p>
+<div class="assistant">
+  <header class="assistant__header">
+    <h1>Asistente</h1>
+  </header>
+
+  <div class="assistant__body">
+    
+    <aside class="history">
+      <h3>Historial</h3>
+
+      @if (history.length) {
+        @for (g of history; track g) {
+          <h4 class="grade">Grado {{ g.grade }}</h4>
+          <ul class="topic-list">
+            @for (t of g.topics; track t.topicId) {
+              <li [class.active]="current?.topicId === t.topicId"
+                  (click)="openFromHistory(t.topicId)">
+                <div class="topic-title">{{ t.topicTitle }}</div>
+                <div class="styles-chips">
+                  <span class="chip" [class.done]="t.visual?.status==='completed'">Visual</span>
+                  <span class="chip" [class.done]="t.auditivo?.status==='completed'">Auditivo</span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      } @else {
+        <div class="history__empty">
+          <p>Aún no has generado ninguna explicación. ¡Selecciona un tema y comienza!</p>
+        </div>
+      }
+    </aside>
+
+    <main class="main">
+      @if (!current) {
+        <section class="card empty-state"> <div class="empty-bot">
+            <img src="assets/kimi.png" alt="bot">
+            <div class="bubble">
+              Hola {{ userName }}, selecciona un tema para explicártelo según tu estilo.
+            </div>
+          </div>
+          
+          <div class="picker">
+            <label>Selecciona un tema</label>
+            <select [(ngModel)]="selectedTopicId">
+              <option [ngValue]="null">—</option>
+              @for (g of topicsByGrade; track g) {
+                <optgroup [label]="'Grado ' + g.grade">
+                  @for (t of g.items; track t.id) {
+                    <option [ngValue]="t.id"
+                            [disabled]="isTopicAlreadyExplained(t.id)">
+                      {{ t.title }}
+                    </option>
+                  }
+                </optgroup>
+              }
+            </select>
+            
+            <div class="actions">
+              <button class="btn" [disabled]="!selectedTopicId" (click)="startSelected('visual')">
+                Generar explicación VISUAL
+              </button>
+              <button class="btn btn-secondary" [disabled]="!selectedTopicId" (click)="startSelected('auditivo')">
+                Generar explicación AUDITIVA
+              </button>
+            </div>
+            <small class="hint">El estilo kinestésico no aplica aquí (solo explicación).</small>
+          </div>
+        </section>
+      }
+
+      @if (current) {
+        <section class="card">
+          <div class="title-row">
+            <h2>{{ current.topicTitle }}</h2>
+            <span class="badge">Grado {{ current.grade }}</span>
+          </div>
+
+          @if (current.status !== 'completed') {
+            <div class="status">
+              @switch (current.status) {
+                @case ('in_progress') {
+                  <p>Generando explicación, por favor mantengase en esta vista.</p>
+                }
+                @case ('interrupted') {
+                  <p>Generación interrumpida. <button class="link" (click)="resume()">Reintentar</button></p>
+                }
+                @case ('failed') {
+                  <p>Hubo un error. <button class="link" (click)="resume()">Intentar de nuevo</button></p>
+                }
+              }
+              @if (current.notes) {
+                <p class="notes">{{ current.notes }}</p>
+              }
+            </div>
+          }
+
+          @if (current.paragraphs.length) {
+            <div class="expl">
+              @for (p of current.paragraphs; track p) {
+                <article class="para">
+                  @if (p.imageUrl) {
+                    <div class="para__media">
+                      <img [src]="p.imageUrl" alt="">
+                    </div>
+                  }
+                  <div class="para__text">{{ p.text }}</div>
+                  @if (current.style === 'auditivo' && p.audioUrl) {
+                    <div class="para__audio">
+                      <audio controls [src]="p.audioUrl"></audio>
+                    </div>
+                  }
+                </article>
+              }
+            </div>
+          }
+
+          <div class="secondary-actions">
+            @if (canGenerateOther('visual')) {
+              <button class="btn" (click)="startOther('visual')">Generar versión VISUAL</button>
+            }
+            @if (canGenerateOther('auditivo')) {
+              <button class="btn btn-secondary" (click)="startOther('auditivo')">
+                Generar versión AUDITIVA (audio por párrafo)
+              </button>
+            }
+          </div>
+
+          <div class="footer-actions">
+            <button class="btn" (click)="closeDetail()">Volver</button>
+          </div>
+        </section>
+      }
+    </main>
+  </div>
+</div>

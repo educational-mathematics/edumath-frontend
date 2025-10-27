@@ -1,0 +1,332 @@
+/* ========================================================= */
+/* ESTILOS BASE Y CENTRADO DEL CONTENIDO */
+/* ========================================================= */
+.assistant {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #F9FAFB;
+    padding: 30px 24px;
+    min-height: calc(100vh - 60px);
+}
+
+.assistant__header h1 {
+    font-weight: 800;
+    color: #1e3a8a;
+    margin-bottom: 24px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 24px;
+}
+
+/* Contenedor principal para centrar el historial y el main */
+.assistant__body {
+    display: grid;
+    /* Historial: 280px, Main: el resto (1fr) */
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* El main usa flexbox para centrar el card dentro de su columna */
+.main {
+    display: flex;
+    justify-content: flex-start; /* Por defecto a la izquierda cuando hay historial */
+    width: 100%;
+}
+
+/* *** SOLUCIÓN DE CENTRADO DEL CARD GRANDE EN ESTADO INICIAL *** */
+/* Cuando el card es el estado inicial (empty-state), lo centramos en el espacio del main. */
+.main .card.empty-state {
+    max-width: 900px; /* Ancho deseado */
+    margin-left: auto; /* Centrado dentro del contenedor flex */
+    margin-right: auto; /* Centrado dentro del contenedor flex */
+}
+
+
+@media (max-width: 1024px) {
+    .assistant__body {
+        grid-template-columns: 1fr;
+        padding: 0 16px;
+    }
+    .assistant__header h1 {
+        margin-left: auto;
+    }
+    .history {
+        margin-bottom: 20px;
+    }
+}
+@media (max-width: 600px) {
+    .assistant { padding: 20px 0; }
+    .assistant__header h1 {
+        margin-left: auto;
+    }
+    
+    /* En móvil, si el historial está vacío, lo ocultamos para dar más espacio al card */
+    .history:has(.history__empty) {
+        display: none;
+    }
+
+    /* Si el historial se oculta, el card debe tomar el ancho completo del body centrado */
+    .assistant__body {
+        /* Fuerza a grid a ser una sola columna cuando el historial se oculta */
+        grid-template-columns: 1fr; 
+    }
+}
+
+/* ========================================================= */
+/* HISTORIAL LATERAL (ASIDE) */
+/* ========================================================= */
+.history {
+    background: white;
+    border: 1px solid #C7DBFF;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.history h3 {
+    margin: 0 0 15px;
+    font-size: 1.2rem;
+    color: #1e3a8a;
+    font-weight: 700;
+}
+
+/* Estilo para el mensaje de historial vacío */
+.history__empty {
+    padding: 15px 10px;
+    text-align: center;
+    border: 1px dashed #A8C1FF;
+    border-radius: 8px;
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+.history__empty p {
+    margin: 0;
+}
+
+.history .grade {
+    margin: 20px 0 8px;
+    color: #1d4ed8;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+/* ... otros estilos de historial (topic-list, chip) se mantienen ... */
+.topic-list { list-style: none; padding: 0; margin: 0; }
+.topic-list li {
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.topic-list li:hover {
+    background: #f0f4ff;
+    border-color: #a8c1ff;
+    transform: translateY(-1px);
+}
+.topic-list li.active {
+    border-color: #2563EB;
+    background: #eef4ff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+}
+.topic-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #334155;
+    margin-bottom: 4px;
+}
+.styles-chips { margin-top: 6px; }
+.styles-chips .chip {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border: 1px solid #d1e2ff;
+    border-radius: 999px;
+    margin-right: 6px;
+    color: #2563EB;
+    background-color: #f7faff;
+    font-weight: 500;
+}
+.styles-chips .chip.done {
+    background: #10B981;
+    border-color: #059669;
+    color: white;
+    font-weight: 600;
+}
+
+/* ========================================================= */
+/* PANEL PRINCIPAL (MAIN) - Ajustes de Ancho y Tamaño */
+/* ========================================================= */
+.card {
+    background: white;
+    border: 1px solid #C7DBFF;
+    border-radius: 16px;
+    padding: 30px; /* Aumentado */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    /* Ancho máximo cuando es el panel principal */
+    max-width: 900px;
+    width: 100%;
+}
+
+/* === Estado Inicial (Empty Bot) - Ajustes de tamaño === */
+.empty-bot {
+    display: flex;
+    align-items: flex-end;
+    gap: 25px; 
+    margin-bottom: 40px; 
+}
+.empty-bot img {
+    width: 120px; 
+    height: auto;
+    -webkit-user-drag: none;
+}
+.empty-bot .bubble {
+    border: 2px solid #2563EB;
+    background: #eef4ff;
+    border-radius: 18px 18px 18px 4px;
+    padding: 18px 25px;
+    font-size: 1.2rem;
+    color: #334155;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+/* === Selector de Tema (Picker) - Ajustes de tamaño === */
+.picker { margin-top: 20px; display: grid; gap: 18px; }
+.picker label {
+    font-weight: 600;
+    color: #1e3a8a;
+    font-size: 1.2rem; 
+}
+.picker select {
+    padding: 14px; 
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    color: #334155;
+    background-color: #fff;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232563EB%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.4-6.3h-258c-5.8%200-11.1%203.1-13.4%207.7-2.3%204.6-1.1%2010.2%203.2%2014.5l141%20138.8c3.2%203.1%207.6%204.6%2011.8%204.6s8.6-1.5%2011.8-4.6l141-138.8c4.3-4.3%205.5-9.9%203.2-14.5z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 14px;
+}
+.picker optgroup { font-weight: bold; }
+
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.hint {
+    font-size: 0.95rem;
+    color: #4b5563;
+    margin-top: -5px;
+}
+
+/* === Botones === */
+.btn {
+    padding: 14px 25px;
+    background-color: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+    flex: 1 1 auto;
+    min-width: 200px;
+}
+.btn:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px rgba(37, 99, 235, 0.3);
+}
+.btn-secondary {
+    background-color: #6B7280;
+    box-shadow: 0 4px 8px rgba(107, 114, 128, 0.2);
+}
+.btn-secondary:hover {
+    background-color: #4B5563;
+    box-shadow: 0 6px 10px rgba(107, 114, 128, 0.3);
+}
+
+/* === Explicación Abierta === */
+.title-row {
+    display:flex;
+    align-items:center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.title-row h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #1e3a8a;
+}
+.badge {
+    background: #E0E7FF;
+    color: #1d4ed8;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #A8C1FF;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.status {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    border: 1px solid #FCA5A5;
+    background: #FEE2E2;
+    color: #991B1B;
+}
+.status p { margin: 0; }
+.notes {
+    color: #4B5563;
+    font-size: 0.9rem;
+    margin-top: 8px;
+}
+
+.expl {
+    margin-top: 10px;
+    display: grid;
+    gap: 20px;
+}
+.para {
+    display:grid;
+    gap: 12px;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 16px;
+    line-height: 1.6;
+    color: #334155;
+}
+.para__media img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.para__audio audio {
+    width: 100%;
+    filter: sepia(20%) saturate(70%) grayscale(1) opacity(0.8);
+    transition: all 0.2s ease;
+}
+.para__audio audio:hover {
+    filter: none;
+}
+
+.secondary-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    border-top: 1px solid #E5E7EB;
+    padding-top: 20px;
+    flex-wrap: wrap;
+}
+.footer-actions {
+    margin-top: 20px;
+    text-align: right;
+}

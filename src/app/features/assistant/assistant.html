@@ -18,8 +18,8 @@
                   (click)="openFromHistory(t.topicId)">
                 <div class="topic-title">{{ t.topicTitle }}</div>
                 <div class="styles-chips">
-                  <span class="chip" [class.done]="t.visual?.status==='completed'">Visual</span>
-                  <span class="chip" [class.done]="t.auditivo?.status==='completed'">Auditivo</span>
+                  <span class="chip" [class.done]="t.visual?.status==='completed'" (click)="openFromHistory(t.topicId,'visual')">Visual</span>
+                  <span class="chip" [class.done]="t.auditivo?.status==='completed'" (click)="openFromHistory(t.topicId,'auditivo')">Auditivo</span>
                 </div>
               </li>
             }
@@ -72,61 +72,79 @@
 
       @if (current) {
         <section class="card">
-          <div class="title-row">
-            <h2>{{ current.topicTitle }}</h2>
-            <span class="badge">Grado {{ current.grade }}</span>
-          </div>
-
-          @if (current.status !== 'completed') {
-            <div class="status">
-              @switch (current.status) {
-                @case ('in_progress') {
-                  <p>Generando explicación, por favor mantengase en esta vista.</p>
-                }
-                @case ('interrupted') {
-                  <p>Generación interrumpida. <button class="link" (click)="resume()">Reintentar</button></p>
-                }
-                @case ('failed') {
-                  <p>Hubo un error. <button class="link" (click)="resume()">Intentar de nuevo</button></p>
-                }
-              }
-              @if (current.notes) {
-                <p class="notes">{{ current.notes }}</p>
-              }
+            <div class="title-row">
+              <h2>{{ current.topicTitle }}</h2>
+              <span class="badge">Grado {{ current.grade }}</span>
             </div>
-          }
-
-          @if (current.paragraphs.length) {
-            <div class="expl">
-              @for (p of current.paragraphs; track p) {
-                <article class="para">
-                  @if (p.imageUrl) {
-                    <div class="para__media">
-                      <img [src]="p.imageUrl" alt="">
-                    </div>
+          
+            @if (shouldShowTabs) {
+              <div class="tabs">
+                <button class="tab" [class.active]="activeTab==='visual'" (click)="switchTab('visual')">Visual</button>
+                <button class="tab" [class.active]="activeTab==='auditivo'" (click)="switchTab('auditivo')">Auditivo</button>
+              </div>
+            }
+          
+            @if (current.status !== 'completed') {
+              <div class="status">
+                @switch (current.status) {
+                  @case ('in_progress') {
+                    <p>Generando explicación, por favor mantente en esta vista…</p>
                   }
-                  <div class="para__text">{{ p.text }}</div>
-                  @if (current.style === 'auditivo' && p.audioUrl) {
-                    <div class="para__audio">
-                      <audio controls [src]="p.audioUrl"></audio>
-                    </div>
+                  @case ('interrupted') {
+                    <p>
+                      Generación interrumpida. <button class="link" (click)="resume()">Reintentar</button>
+                    </p>
                   }
-                </article>
+                  @case ('failed') {
+                    <p>
+                      Hubo un error. <button class="link" (click)="resume()">Intentar de nuevo</button>
+                    </p>
+                  }
+                }
+                @if (current.notes) {
+                  <p class="notes">{{ current.notes }}</p>
+                }
+              </div>
+            }
+          
+            @if (shouldShowTabs) {
+              @if (activeTab === 'visual' && !hasStyle('visual')) {
+                <div class="empty-tab">
+                  <p>No tienes la versión visual aún.</p>
+                  <button class="btn" (click)="startOther('visual')" [disabled]="current.status==='in_progress'">
+                    Generar versión VISUAL
+                  </button>
+                </div>
               }
-            </div>
-          }
-
-          <div class="secondary-actions">
-            @if (canGenerateOther('visual')) {
-              <button class="btn" (click)="startOther('visual')">Generar versión VISUAL</button>
+              @if (activeTab === 'auditivo' && !hasStyle('auditivo')) {
+                <div class="empty-tab">
+                  <p>No tienes la versión auditiva aún.</p>
+                  <button class="btn btn-secondary" (click)="startOther('auditivo')" [disabled]="current.status==='in_progress'">
+                    Generar versión AUDITIVA
+                  </button>
+                </div>
+              }
             }
-            @if (canGenerateOther('auditivo')) {
-              <button class="btn btn-secondary" (click)="startOther('auditivo')">
-                Generar versión AUDITIVA (audio por párrafo)
-              </button>
+          
+            @if (shouldShowParagraphs && current.paragraphs.length) {
+              <div class="expl">
+                @for (p of current.paragraphs; track p) {
+                  <article class="para">
+                    @if (p.imageUrl && activeTab === 'visual') {
+                      <div class="para__media">
+                        <img [src]="abs(p.imageUrl)" alt="">
+                      </div>
+                    }
+                    <div class="para__text">{{ p.text }}</div>
+                    @if (activeTab === 'auditivo' && p.audioUrl) {
+                      <div class="para__audio">
+                        <audio controls [src]="abs(p.audioUrl)"></audio>
+                      </div>
+                    }
+                  </article>
+                }
+              </div>
             }
-          </div>
-
           <div class="footer-actions">
             <button class="btn" (click)="closeDetail()">Volver</button>
           </div>

@@ -29,7 +29,6 @@ export class Profile implements OnInit, OnDestroy {
   private lastName: string | undefined;
 
   private toast = inject(Toast);
-  private shownKingToast = false; // evita repetir el toast en esta sesión de la vista
   private api = inject(Api);
 
   msg = ''; err = ''; loading = false;
@@ -282,18 +281,6 @@ export class Profile implements OnInit, OnDestroy {
           // no muestres “fuera del top”
           this.myOutside = null;
 
-          // Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
-          if (!this.shownKingToast && inTop.rank === 1 && (inTop.points ?? 0) > 1000) {
-            this.toast.success('¡Insignia obtenida: El Rey!', {
-              message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
-              imageUrl: this.apiBase + '/media/badges/king.png',
-              timeoutMs: 3000,
-            });
-            this.shownKingToast = true;
-
-            // refresca user para que las insignias queden actualizadas en Auth (silencioso)
-            this.auth.refreshMe().subscribe({ error: () => {} });
-          }
           return;
         }
 

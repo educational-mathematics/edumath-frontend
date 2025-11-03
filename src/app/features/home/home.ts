@@ -6,6 +6,10 @@ import { Navbar } from '../../shared/components/navbar/navbar';
 import { AddTopicDialog } from '../topics/add-topic-dialog/add-topic-dialog';
 import { environment } from '../../../environments/environment';
 
+function asArray<T = any>(v: unknown): T[] {
+  return Array.isArray(v) ? (v as T[]) : [];
+}
+
 @Component({
   selector: 'app-home',
   imports: [Navbar, CommonModule, AddTopicDialog],
@@ -45,7 +49,7 @@ export class Home {
     this.loaded = false;
     this.topics.myTopics().subscribe({
       next: list => {
-        this.items = (list || []).map(t => ({
+        this.items = asArray<any>(list).map((t: any) => ({
           ...t,
           // normaliza en front por si viene absoluta o relativa
           coverUrl: this.resolveImg(t.coverUrl)

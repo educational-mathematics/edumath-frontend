@@ -87,6 +87,7 @@
     box-shadow: 0 4px 12px rgba(25, 118, 210, 0.08); /* Sombra más sutil */
     border: 1px solid #e8eef8;
     transition: transform .1s ease, box-shadow .2s ease;
+    margin-bottom: 15px;
 }
 
 .card:hover {

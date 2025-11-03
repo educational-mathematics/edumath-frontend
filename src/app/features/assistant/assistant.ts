@@ -6,6 +6,10 @@ import { Navbar } from '../../shared/components/navbar/navbar';
 import { Auth } from '../../core/auth';
 import { Api } from '../../core/api';
 
+function asArray<T = any>(v: unknown): T[] {
+  return Array.isArray(v) ? (v as T[]) : [];
+}
+
 @Component({
   selector: 'app-assistant',
   imports: [Navbar, FormsModule],
@@ -45,17 +49,18 @@ export class Assistant implements OnInit, OnDestroy {
   loadTopics() {
     this.core.get<Record<string, any[]>>('/topics/catalog').subscribe({
       next: data => {
-        const list: AssistantTopicInfo[] = [];
+        const all: AssistantTopicInfo[] = [];
         Object.entries(data || {}).forEach(([gradeStr, arr]) => {
           const grade = Number(gradeStr);
-          (arr || []).forEach((t: any) => {
-            list.push({ id: t.id, grade, slug: t.slug, title: t.title, coverUrl: this.core.absolute(t.coverUrl) });
+          const arrList  = asArray<any>(arr);
+          arrList.forEach((t: any) => {
+            all.push({ id: t.id, grade, slug: t.slug, title: t.title, coverUrl: this.core.absolute(t.coverUrl) });
           });
         });
-        list.sort((a,b)=> (a.grade-b.grade) || a.title.localeCompare(b.title));
-        this.topics = list;
+        all.sort((a,b)=> (a.grade-b.grade) || a.title.localeCompare(b.title));
+        this.topics = all;
         const map = new Map<number, AssistantTopicInfo[]>();
-        list.forEach(t => { if(!map.has(t.grade)) map.set(t.grade, []); map.get(t.grade)!.push(t); });
+        all.forEach(t => { if(!map.has(t.grade)) map.set(t.grade, []); map.get(t.grade)!.push(t); });
         this.topicsByGrade = [...map.entries()].sort((a,b)=>a[0]-b[0]).map(([grade,items])=>({grade,items}));
       },
       error: _ => { this.topics = []; this.topicsByGrade = []; }
@@ -102,7 +107,7 @@ export class Assistant implements OnInit, OnDestroy {
 
   open(explanationId: string) {
     this.api.getExplanation(explanationId).subscribe(exp => {
-      exp.paragraphs = (exp.paragraphs || []).map(p => ({
+      exp.paragraphs = asArray<any>(exp.paragraphs).map((p: any) => ({
         ...p, imageUrl: this.abs(p.imageUrl), audioUrl: this.abs(p.audioUrl)
       }));
       this.current = exp;
@@ -114,7 +119,7 @@ export class Assistant implements OnInit, OnDestroy {
       if (exp.status === 'in_progress') {
         this.pollTimer = setInterval(() => {
           this.api.getExplanation(explanationId).subscribe(e2 => {
-            e2.paragraphs = (e2.paragraphs || []).map(p => ({
+            e2.paragraphs = asArray<any>(e2.paragraphs).map((p: any) => ({
               ...p, imageUrl: this.abs(p.imageUrl), audioUrl: this.abs(p.audioUrl)
             }));
             this.current = e2;

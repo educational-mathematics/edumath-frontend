@@ -21,9 +21,9 @@ export class AddTopicDialog {
   private topics = inject(Topics);
 
   readonly apiBase = environment.apiUrl;
-  grades: number[] = [1,2,3,4,5,6];
-  selGrade = 1;
-  catalog: Record<number, any[]> = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+  grades: number[] = [3,4,5,6];
+  selGrade = 3;
+  catalog: Record<number, any[]> = { 3: [], 4: [], 5: [], 6: [] };
 
   ngOnInit() {
     this.topics.catalog().subscribe(cat => {

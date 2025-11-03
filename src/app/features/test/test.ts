@@ -102,7 +102,7 @@ export class Test {
       this.tiedStyles = (allZero ? order : winners);
       this.tiedText = this.humanList(this.tiedStyles.map(s => this.styleLabel(s)));
       this.selectedStyle = null;
-      this.showStylePicker = true;   // ← abre el selector con SOLO empatados
+      this.showStylePicker = true;
       return;
     }
 

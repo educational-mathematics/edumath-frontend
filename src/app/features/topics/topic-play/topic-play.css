@@ -1,0 +1,400 @@
+/* ========================================================= */
+/* Estilos Base Mejorados */
+/* ========================================================= */
+
+.wrap { 
+    max-width: 920px; 
+    margin: 24px auto; /* Más espacio */
+    padding: 12px; 
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Encabezado */
+.header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
+    border-bottom: 1px solid #e0e7f3;
+    padding-bottom: 10px;
+}
+.header h2 {
+    color: #1e3a8a; /* Azul oscuro */
+    margin: 0;
+    font-weight: 800;
+}
+.right { 
+    display: flex; 
+    gap: 16px; 
+    align-items: center; 
+    font-size: 0.9rem;
+}
+.timer { 
+    background: #eef4ff; /* Fondo azul más sutil */
+    color: #1976d2;
+    padding: 4px 10px; 
+    border-radius: 8px;
+    font-weight: 700;
+}
+.exit { 
+    background: #fef2f2; /* Fondo rojo muy claro */
+    color: #b91c1c; 
+    border: 1px solid #fecaca;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background .2s;
+}
+.exit:hover {
+    background: #fee2e2;
+}
+
+/* Botones genéricos */
+button {
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: 700;
+    transition: transform .1s, box-shadow .2s;
+}
+
+button.primary {
+    background: #1976d2; /* Azul primario */
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(25, 118, 210, 0.2);
+}
+button.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(25, 118, 210, 0.3);
+}
+button.secondary {
+    background: #fff;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+}
+button.secondary:hover {
+    background: #f9fafb;
+    transform: translateY(-1px);
+}
+button.danger {
+    background: #ef4444;
+    color: #fff;
+}
+
+/* Explicación */
+.explain {
+    background: #f8fbff; /* Fondo muy claro */
+    border: 1px solid #cfd7e7;
+    padding: 16px;
+    border-radius: 12px; 
+    margin: 10px 0 20px 0;
+}
+.explain p { margin: 0; line-height: 1.6; color: #374151; }
+.expimg { 
+    max-width: 100%;
+    height: auto;
+    margin: 8px 0 12px;
+    border-radius: 8px;
+}
+
+/* Contenedor de Pregunta */
+section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.qhead { 
+    font-weight: 700; 
+    font-size: 1.1rem;
+    color: #4b5563;
+    margin: 0 0 15px 0;
+}
+
+.q { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; color: #1f2937; }
+.qimg { max-width: 240px; display: block; margin: 12px 0 20px; border-radius: 8px; border: 1px solid #e5e7eb; }
+
+/* Opciones (Multiple Choice) */
+.mcq .opt { 
+    display: flex; 
+    align-items: center;
+    background: #f9fafb;
+    padding: 12px;
+    margin: 8px 0; 
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+.mcq .opt:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+.mcq .opt input[type="radio"] { 
+    margin-right: 12px; 
+    transform: scale(1.1);
+    accent-color: #1976d2;
+}
+
+.actions { margin-top: 12px; text-align: right; }
+.actions .primary {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(59,130,246,.25);
+}
+.actions .primary:disabled {
+  background: #93c5fd;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Emparejamiento (Match Pairs) */
+.pairs .row { 
+    display: flex; 
+    align-items: center; 
+    gap: 20px; 
+    margin: 10px 0; 
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+.pairs .left { 
+    display: inline-block; 
+    min-width: 150px; 
+    font-weight: 600; 
+    color: #1f2937;
+}
+.pairs select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    flex-grow: 1;
+    min-width: 150px;
+}
+
+/* Clasificación (Drag to Bucket) */
+.bucket-matrix { 
+    width:100%; 
+    border-collapse:separate; /* Para border-radius */
+    border-spacing: 0;
+    margin-bottom: 15px;
+}
+.bucket-matrix th, .bucket-matrix td { 
+    padding:.7rem .8rem; 
+    border-right: 1px solid #f3f4f6;
+    border-bottom: 1px solid #f3f4f6;
+}
+.bucket-matrix thead th { 
+    background: #f9fafb;
+    border-bottom:2px solid #e5e7eb; 
+    font-weight: 700;
+}
+.bucket-matrix tbody tr:last-child td { border-bottom: none; }
+.bucket-matrix td:last-child, .bucket-matrix th:last-child { border-right: none; }
+.bucket-matrix td { background: #fff; }
+.center { text-align:center; }
+.center input[type="radio"] { accent-color: #1976d2; transform: scale(1.1); }
+
+/* Retroalimentación */
+.feedback { 
+    margin-top: 20px; 
+    padding: 15px;
+    border-radius: 12px;
+    background: #fef2f2; /* Default (error) */
+    border: 1px solid #fca5a5;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+.feedback .ok { 
+    color: #059669; 
+    font-weight: 700; 
+    background: #ecfdf5;
+    border: 1px solid #34d399;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+.feedback .err { 
+    color: #b91c1c; 
+    font-weight: 700; 
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+.feedback .text { 
+    margin: 0; 
+    font-size: 0.95rem; 
+    color: #4b5563;
+}
+
+
+/* ========================================================= */
+/* Estilos Modales (Pop-ups) */
+/* ========================================================= */
+
+.backdrop.finish {
+    /* El confeti necesita ser visible sobre todo */
+    z-index: 1001; 
+}
+
+.backdrop canvas {
+    position: fixed; /* Usar fixed para asegurar que cubra todo el viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Crucial para no bloquear la interacción con el modal */
+    z-index: 1; /* Estará detrás del modal (z-index: 2) pero sobre el fondo (backdrop) */
+}
+
+.modal.done {
+    z-index: 2; /* Asegura que el contenido esté sobre el confeti */
+    /* ... (resto de estilos del modal.done) ... */
+}
+
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: #1e3a8a;
+}
+.modal p {
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+.modal-actions button {
+    flex-grow: 1;
+}
+
+/* Modal de Finalización */
+.backdrop.finish {
+    /* El confeti necesita ser visible sobre todo */
+    z-index: 1001; 
+}
+
+.backdrop canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Crucial para no bloquear el modal */
+    z-index: 1;
+}
+
+.modal.done {
+    z-index: 2; /* Asegura que el contenido esté sobre el confeti */
+    border: 3px solid #f59e0b; /* Borde dorado para celebración */
+    background: #fff7ed; /* Fondo sutil */
+}
+
+/* Animación */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.custom-audio-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #eef4ff; /* Fondo sutil para el control */
+    border: 1px solid #c7dbff;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: background 0.2s ease;
+    user-select: none;
+}
+
+.custom-audio-control:hover {
+    background: #e0e7f3;
+}
+
+.audio-icon {
+    font-size: 1.2rem;
+    padding: 6px 8px;
+    background: #1976d2; /* Círculo azul para el icono */
+    color: #fff;
+    border-radius: 50%;
+    line-height: 1; /* Centrar el icono */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.audio-status {
+    font-weight: 600;
+    color: #1e3a8a;
+    flex-grow: 1;
+}
+
+.loading-text {
+    font-weight: 400;
+    color: #5b6b7a;
+    animation: pulse 1.5s infinite;
+}
+
+/* Botón de reproducción para preguntas (MCQ) */
+.play-button {
+    background: #dbeafe;
+    color: #1e3a8a;
+    border: 1px solid #93c5fd;
+    padding: 8px 15px;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+.play-button:hover {
+    background: #bfdbfe;
+    transform: none;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}

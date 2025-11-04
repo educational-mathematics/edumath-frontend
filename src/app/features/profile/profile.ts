@@ -4,9 +4,11 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Auth } from '../../core/auth';
 import { Navbar } from '../../shared/components/navbar/navbar';
-import { RankingRow } from '../../core/models/ranking.model'; // 👈 crea este interface { rank, alias, points, avatar_url? }
+import { RankingRow } from '../../core/models/ranking.model';
 import { BadgesPanel } from '../badges/badges-panel/badges-panel';
 import { Toast } from '../../core/toast';
+import { environment } from '../../../environments/environment';
+import { Api } from '../../core/api';
 
 @Component({
   selector: 'app-profile',
@@ -18,6 +20,7 @@ import { Toast } from '../../core/toast';
 export class Profile implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(Auth);
+  readonly apiBase = environment.apiUrl;
 
   // Stream del usuario
   me$ = this.auth.user$;
@@ -26,9 +29,11 @@ export class Profile implements OnInit, OnDestroy {
   private lastName: string | undefined;
 
   private toast = inject(Toast);
-  private shownKingToast = false; // evita repetir el toast en esta sesión de la vista
+  private api = inject(Api);
 
   msg = ''; err = ''; loading = false;
+  aliasError = '';
+  aliasSuccess = '';
 
   // estados de edición
   editingName = false;
@@ -43,6 +48,9 @@ export class Profile implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   avatarPreview: string | null = null;
 
+  avatarUrlResolved = 'assets/avatar-placeholder.png';
+  private avatarVer = Date.now();
+
   profileForm = this.fb.group({
     name: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(2)]],
     avatarUrl: [''],
@@ -51,6 +59,34 @@ export class Profile implements OnInit, OnDestroy {
   aliasForm = this.fb.group({
     alias: [{ value: '', disabled: true }, [Validators.minLength(3), Validators.maxLength(32)]],
   });
+
+    // Devuelve una URL lista para <img>, con apiBase si viene relativa (/media/…)
+  private buildImgSrc(u?: string | null): string | null {
+    if (!u) return null;
+    const url = u.trim();
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // Relativa servida por backend
+    if (url.startsWith('/media/') || url.startsWith('/static/')) {
+      return this.apiBase + url;
+    }
+    // Último recurso: trátala como relativa de /media
+    return this.apiBase + '/media/' + url.replace(/^\/+/, '');
+  }
+
+  // === AVATAR PRINCIPAL (se muestra en la tarjeta izquierda) ===
+  avatarSrc(me: any): string {
+    if (this.avatarPreview) return this.avatarPreview;
+    const raw = (me?.avatarUrl || '').trim();
+    const abs = this.api.absolute(raw || '/media/avatars/default.png');
+    return abs ? `${abs}?v=${Date.now()}` : 'assets/avatar-placeholder.png';
+  }
+
+  // === AVATARES DEL RANKING (usa snake_case que viene del backend) ===
+  rankAvatarSrc(raw?: string | null): string {
+    const abs = this.api.absolute(raw || '/media/avatars/default.png');
+    return abs ? `${abs}?v=${Date.now()}` : 'assets/avatar-placeholder.png';
+  }
 
   ngOnInit() {
     // Suscríbete al usuario para parchear formularios y cargar ranking al tener alias
@@ -71,6 +107,8 @@ export class Profile implements OnInit, OnDestroy {
         { emitEvent: false }
       );
 
+      
+
       // Si el alias aparece (o cambia), recarga ranking
       if (me.alias) {
         this.loadRanking();
@@ -80,12 +118,22 @@ export class Profile implements OnInit, OnDestroy {
         this.top100 = [];
         this.myOutside = null;
       }
+      this.avatarUrlResolved = this.resolveAvatar(me?.avatarUrl);
     });
-
     // Forzar refresco al abrir la vista para que me?.points esté al día
     this.auth.refreshMe().subscribe({
       error: () => {} // silencioso
     });
+  }
+
+  private resolveAvatar(raw?: string | null): string {
+    if (this.avatarPreview) return this.avatarPreview; // preview temporal
+
+    const u = (raw || '').trim();
+    // Usa tu helper Api.absolute para pegar base cuando sea relativo (/media/…)
+    const abs = this.api.absolute(u || '/media/avatars/default.png');
+    // cache-buster ESTABLE (no uses Date.now() aquí directamente)
+    return abs ? `${abs}?v=${this.avatarVer}` : 'assets/avatar-placeholder.png';
   }
 
   ngOnDestroy() { this.sub?.unsubscribe(); }
@@ -127,21 +175,34 @@ export class Profile implements OnInit, OnDestroy {
   // Avatar
   pickFile() { this.fileInput?.nativeElement.click(); }
 
+  // Tras subir, fuerza refresh y rompe caché
   onFileChange(evt: Event) {
     const input = evt.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    // preview optimista
-    const url = URL.createObjectURL(file);
-    this.avatarPreview = url;
+    this.avatarPreview = URL.createObjectURL(file);
+    this.msg=''; this.err=''; this.loading = true;
 
-    this.loading = true; this.msg=''; this.err='';
     this.auth.uploadAvatar(file).subscribe({
       next: () => {
+        // cuando el backend ya guardó la nueva ruta:
+        this.avatarPreview = null;
+        this.avatarVer = Date.now();                // ← solo aquí la cambias
+        // refresca /users/me; el subscribe de arriba recalculará avatarUrlResolved
+        this.auth.refreshMe().subscribe({
+          next: (/*me*/) => {
+            // forzamos recomputar la url con el nuevo ver
+            // (si tu stream me$ ya emitió, bastará; por si acaso:)
+            this.me$.subscribe(me => {
+              this.avatarUrlResolved = this.resolveAvatar(me?.avatarUrl);
+            }).unsubscribe();
+          },
+          error: () => {}
+        });
+
         this.loading = false;
         this.msg = 'Foto actualizada.';
-        this.avatarPreview = null;
         input.value = '';
       },
       error: (e) => {
@@ -151,11 +212,8 @@ export class Profile implements OnInit, OnDestroy {
         input.value = '';
       }
     });
-    //desaparecer alerta
-    setTimeout(() => {
-      this.msg = '';
-      this.err = '';
-    }, 3000);
+
+    setTimeout(() => { this.msg = ''; this.err = ''; }, 3000);
   }
 
   // ------ Alias / Ranking ------
@@ -170,29 +228,42 @@ export class Profile implements OnInit, OnDestroy {
     // Reset al valor actual del stream
     const me = await firstValueFrom(this.me$);
     this.aliasForm.controls.alias.setValue(me?.alias ?? '');
+    this.aliasError = '';
+    this.aliasSuccess = '';
   }
   saveAlias() {
-    const alias = (this.aliasForm.getRawValue().alias || '').toString().trim();
-    if (!alias) { this.err = 'El alias no puede estar vacío.'; return; }
-    this.loading = true; this.msg=''; this.err='';
+    const ctrl = this.aliasForm.controls.alias;
+    const alias = (ctrl.getRawValue() || '').toString().trim();
+
+    // limpia mensajes previos solo del bloque de alias
+    this.aliasError = '';
+    this.aliasSuccess = '';
+
+    if (!alias) {
+      this.aliasError = 'El alias no puede estar vacío.';
+      ctrl.markAsTouched();
+      return;
+    }
+
+    this.loading = true;
+
     this.auth.setAlias(alias).subscribe({
       next: () => {
         this.loading = false;
-        this.msg = 'Alias actualizado.';
-        this.cancelEditAlias();
-        // user$ disparará loadRanking si hace falta
+        this.aliasSuccess = 'Alias actualizado.';
+        this.cancelEditAlias();                 // cierra el modo edición
+        setTimeout(() => (this.aliasSuccess = ''), 3000); // opcional
       },
       error: (e) => {
         this.loading = false;
-        this.err = (e?.status === 409) ? 'Ese alias ya está en uso.' : (e?.error?.detail || 'No se pudo actualizar el alias.');
+        this.aliasError =
+          e?.status === 409
+            ? 'Ese alias ya está en uso.'
+            : (e?.error?.detail || 'No se pudo actualizar el alias.');
+        // deja el campo en edición para que el usuario corrija
+        setTimeout(() => (this.aliasError = ''), 3000);
       }
     });
-
-    //desaparecer alerta
-    setTimeout(() => {
-      this.msg = '';
-      this.err = '';
-    }, 3000);
   }
 
   loadRanking() {
@@ -210,18 +281,6 @@ export class Profile implements OnInit, OnDestroy {
           // no muestres “fuera del top”
           this.myOutside = null;
 
-          // 👑 Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
-          if (!this.shownKingToast && inTop.rank === 1 && (inTop.points ?? 0) > 1000) {
-            this.toast.success('¡Insignia obtenida: El Rey!', {
-              message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
-              imageUrl: '/static/badges/king.png',
-              timeoutMs: 3000,
-            });
-            this.shownKingToast = true;
-
-            // refresca user para que las insignias queden actualizadas en Auth (silencioso)
-            this.auth.refreshMe().subscribe({ error: () => {} });
-          }
           return;
         }
 
@@ -236,17 +295,6 @@ export class Profile implements OnInit, OnDestroy {
           next: (meRow) => {
             if (meRow && meRow.rank && meRow.rank > 100) this.myOutside = meRow;
             else this.myOutside = null;
-
-            // Si soy rank 1 y tengo > 1000 pts → toast (una sola vez)
-            //if (!this.shownKingToast && meRow && meRow.rank === 1 && (meRow.points ?? 0) > 1000) {
-              //this.toast.success('¡Insignia obtenida: El Rey!', {
-                //message: 'Has alcanzado el TOP 1 con más de 1000 puntos',
-                //imageUrl: 'assets/king.png',
-                //timeoutMs: 3000,
-              //});
-              //this.shownKingToast = true;
-              //this.auth.refreshMe().subscribe({ error: () => {} });
-            //}
           },
           error: () => { this.myOutside = null; }
         });
@@ -258,13 +306,7 @@ export class Profile implements OnInit, OnDestroy {
       }
     });
   }
-
-  avatarSrc(me: any): string {
-    if (this.avatarPreview) return this.avatarPreview;
-    const u = (me?.avatarUrl || '').trim();
-    return u || 'assets/avatar-placeholder.png';
-  }
-
+  
   onImgError(ev: Event) {
     (ev.target as HTMLImageElement).src = 'assets/avatar-placeholder.png';
   }

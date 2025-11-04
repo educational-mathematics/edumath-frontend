@@ -26,7 +26,7 @@ export class BadgesPanel {
   visibleBadges = signal<Badge[]>([]);
   private recompute = effect(() => {
     const all = this.badges();
-    const slice = this.showAll() ? all : all.slice(0, 7); // primeras 8 en vista compacta
+    const slice = this.showAll() ? all : all.slice(0, 7); 
     this.visibleBadges.set(slice);
   });
 

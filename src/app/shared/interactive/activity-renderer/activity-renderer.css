@@ -1,0 +1,15 @@
+.activity-card {
+  border-radius: 20px;
+  padding-bottom: 8px;
+}
+
+.explain {
+  opacity: 0.8;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+}
+
+.unsupported {
+  padding: 24px;
+  opacity: 0.7;
+}

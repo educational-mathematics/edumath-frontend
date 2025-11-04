@@ -6,6 +6,7 @@ import { LoginRequest } from './models/login.model';
 import { RegisterRequest } from './models/register.model';
 import { RankingRow } from './models/ranking.model';
 import { Toast } from './toast';
+import { BadgeToastGuard } from './badge-toast-guard';
 
 type Purpose = 'register' | 'reset_password';
 
@@ -27,11 +28,36 @@ export class Auth {
   private toast = inject(Toast);
   private api = inject(Api);
 
+  private guard = inject(BadgeToastGuard);
+
   private tokenKey = 'token';
   private userKey  = 'user';
 
-  private userSubject = new BehaviorSubject<User | null>(this.readUserFromSession());
+  private userSubject = new BehaviorSubject<User | null | undefined>(undefined);
   user$ = this.userSubject.asObservable();
+
+  constructor() {
+    // intenta hidratar sincrónico: primero session, luego local
+    const uSess = this.readUserFromSession();
+    const tSess = sessionStorage.getItem(this.tokenKey);
+    if (uSess && this.isTokenValidStr(tSess)) {
+      this.userSubject.next(uSess);
+      return;
+    }
+
+    const uLocal = this.readUserFromLocal();
+    const tLocal = localStorage.getItem(this.tokenKey);
+    if (uLocal && this.isTokenValidStr(tLocal)) {
+      // copia token a session para que el interceptor funcione
+      sessionStorage.setItem(this.tokenKey, tLocal!);
+      sessionStorage.setItem(this.userKey, JSON.stringify(uLocal));
+      this.userSubject.next(uLocal);
+      return;
+    }
+
+    // no hay nada válido -> listo (null)
+    this.userSubject.next(null);
+  }
 
   // ---------- Utils de storage ----------
   private readUserFromSession(): User | null {
@@ -72,14 +98,14 @@ export class Auth {
   }
 
   private setSession(user: User | null, token?: string | null) {
-    // sessionStorage (runtime)
+    // sessionStorage
     if (user) sessionStorage.setItem(this.userKey, JSON.stringify(user));
     else sessionStorage.removeItem(this.userKey);
 
     if (token === null) sessionStorage.removeItem(this.tokenKey);
     else if (token)     sessionStorage.setItem(this.tokenKey, token);
 
-    // localStorage (solo para rehidratar)
+    // localStorage (rehidratación entre sesiones)
     if (user) localStorage.setItem(this.userKey, JSON.stringify(user));
     else localStorage.removeItem(this.userKey);
 
@@ -128,31 +154,19 @@ export class Auth {
       .form<Token>('/auth/login', { username: data.email, password: data.password })
       .pipe(
         tap(t => {
-          // ✅ token disponible para el interceptor ANTES de llamar a /users/me
           sessionStorage.setItem(this.tokenKey, t.access_token);
-          localStorage.setItem(this.tokenKey, t.access_token); // copia para rehidratación
+          localStorage.setItem(this.tokenKey, t.access_token);
         }),
         switchMap(() => this.me()),
-        tap(u => {
-          // ✅ ya con el user, consolidamos session+local y emitimos por user$
-          const tok = sessionStorage.getItem(this.tokenKey);
-          this.setSession(u, tok);
-        }),
+        tap(u => this.setSession(u, sessionStorage.getItem(this.tokenKey))),
         catchError(err => {
-          // limpieza defensiva si algo falla
-          sessionStorage.removeItem(this.tokenKey);
-          sessionStorage.removeItem(this.userKey);
-          localStorage.removeItem(this.tokenKey);
-          localStorage.removeItem(this.userKey);
-          console.error('❌ login', err);
+          this.setSession(null, null);
           return of(null);
         })
       );
   }
 
-  logout() {
-    this.setSession(null, null);
-  }
+  logout() { this.setSession(null, null); }
 
   // ---------- API helpers ----------
   register(data: RegisterRequest): Observable<User> {
@@ -181,7 +195,7 @@ export class Auth {
     return this.api.get<any>('/users/me').pipe(map(this.mapUserDto));
   }
 
-  getCurrentUser(): User | null {
+  getCurrentUser(): User | null | undefined {
     return this.userSubject.value;
   }
 
@@ -277,24 +291,32 @@ export class Auth {
 
   refreshMe() {
     return this.me().pipe(
-      tap(u => this.setUser(u)) // actualiza user$ y storage
+      tap(u => this.setSession(u, sessionStorage.getItem(this.tokenKey)))
     );
   }
 
   markFirstLoginDone() {
+   //return this.api.post<FirstLoginDoneResp>('/users/me/first-login-done', {}).pipe(
+   //  tap(resp => {
+   //    const list = resp.awardedBadges ?? [];
+   //    for (const b of list) {
+   //      this.toast.success(`¡Insignia obtenida! ${b.title}`, {
+   //        imageUrl: this.api.absolute(b.imageUrl),
+   //        timeoutMs: 4000,
+   //        badgeSlug: b.slug   // ← NUEVO
+   //      });
+   //    }
+   //  }),
+   //  switchMap(() => this.refreshMe())
+   //);
     return this.api.post<FirstLoginDoneResp>('/users/me/first-login-done', {}).pipe(
-      tap(resp => {
-        const list = resp.awardedBadges ?? [];
-        for (const b of list) {
-          this.toast.success(`¡Insignia obtenida! ${b.title}`, {
-            imageUrl: this.api.absolute(b.imageUrl),
-            timeoutMs: 4000
-          });
-        }
-        if (list.length) {
-          this.refreshMe().subscribe(); // mantener consistente el user$
-        }
-      }),
-    );
+    // ⚠️ Quitamos el tap que mostraba toasts aquí
+    switchMap((resp) => this.refreshMe().pipe(
+      // para que el caller pueda usar resp.awardedBadges si quiere
+      // devolvemos un objeto que contenga ambos
+      // (si no lo necesitas, puedes devolver solo resp)
+      map(() => resp)
+    ))
+  );
   }
 }

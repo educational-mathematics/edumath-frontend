@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { Auth } from '../../core/auth';
 
 export const authGuard: CanActivateFn = (route, state) => {
-   console.log('🛡️ authGuard ejecutándose para:', state.url);
+  console.log('🛡️ authGuard ejecutándose para:', state.url);
   
   const auth = inject(Auth);
   const router = inject(Router);
@@ -20,6 +20,10 @@ export const authGuard: CanActivateFn = (route, state) => {
   // Si es primera vez → welcome
   if (user.firstLoginDone !== true) {
     console.log('🆕 Primera vez, redirigiendo a welcome');
+    if (state.url === '/home' || state.url.startsWith('/topic/')) {
+      return true;
+    }
+    // bloquea el resto
     return router.parseUrl('/welcome');
   }
 

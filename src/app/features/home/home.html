@@ -1,6 +1,71 @@
 <app-navbar></app-navbar>
 
-<div class="home-container">
-  <h1>Bienvenido a EduMath</h1>
-  <p>Aquí podrás acceder a tus temas, practicar y mejorar tus habilidades.</p>
+<div class="home-container"> 
+  <div class="header">
+    <h2>Mis temas</h2>
+    <button class="add" (click)="onOpenAdd()"> Añadir un tema</button>
+  </div>
+
+  @if (loaded && items.length === 0) {
+    <div class="empty">
+      <img src="assets/empty.png" alt="Sin temas" draggable="false">
+      <p>No tienes temas. Añade uno para empezar</p>
+    </div>
+  }
+
+  @if (items.length > 0) {
+    <div class="grid">
+      @for (t of items; track t.userTopicId) {
+        <div class="card" (click)="enter(t)">
+          <img
+            [src]="t.coverUrl"
+            (error)="onImgError($event)"
+            alt=""
+            draggable="false"
+          >
+          <div class="card-content">
+            <div class="title">{{ t.title }}</div>
+            <div class="progress-area">
+              <div class="progress">
+                <div class="bar" [style.width.%]="t.progressPct"></div>
+              </div>
+              <div class="pct">{{ t.progressPct }}%</div>
+            </div>
+
+            <div class="completed-row">
+              <span class="dot done"></span>
+              <span class="completed-text">
+                Completado {{ t.completedCount || 0 }} {{ (t.completedCount || 0) === 1 ? 'vez' : 'veces' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>
+
+@if (showAdd) {
+  <app-add-topic-dialog
+    [open]="true"
+    [alreadyAddedIds]="alreadyAddedIds"
+    (picked)="onPickTopic($event)"
+    (canceled)="onCancelAdd()">
+  </app-add-topic-dialog>
+}
+
+<!-- MODAL de confirmación de reinicio -->
+@if (showRestartConfirm) {
+  <div class="backdrop">
+    <div class="modal">
+      <h3>Reiniciar tema</h3>
+      <p>
+        Ya completaste <b>{{ restartTitle }}</b>. ¿Quieres reiniciarlo desde cero?
+      </p>
+      <div class="modal-actions">
+        <button class="secondary" (click)="cancelRestart()">Cancelar</button>
+        <button class="primary danger" (click)="confirmRestart()">Reiniciar</button>
+      </div>
+    </div>
+  </div>
+}

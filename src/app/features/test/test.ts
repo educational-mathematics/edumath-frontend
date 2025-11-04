@@ -10,6 +10,7 @@ import { switchMap, tap } from 'rxjs';
 import { Toast } from '../../core/toast';
 import { Api } from '../../core/api';
 import { inject } from '@angular/core';
+import { BadgeToastGuard } from '../../core/badge-toast-guard';
 
 type VAK = 'visual'|'auditivo'|'kinestesico';
 
@@ -38,6 +39,16 @@ export class Test {
   showResults = false;
   resultStyle: VAK | null = null;
   resultScores: { visual: number; auditivo: number; kinestesico: number } | null = null;
+
+  showStylePicker = false;
+  selectedStyle: VAK | null = null;
+
+  tiedStyles: VAK[] = [];    // estilos empatados
+  tiedText = '';             // texto “Visual y Auditivo”, etc.
+
+  private badgeGuard = inject(BadgeToastGuard);
+
+  private pendingTotals?: { visual:number; auditivo:number; kinestesico:number };
 
   // canvas para confetti
   @ViewChild('confettiCanvas') confettiCanvasRef?: ElementRef<HTMLCanvasElement>;
@@ -76,15 +87,38 @@ export class Test {
   }
 
   submit() {
-    const totals: { visual: number; auditivo: number; kinestesico: number } = {
-    visual: 0, auditivo: 0, kinestesico: 0,
-    };
+    const totals = { visual: 0, auditivo: 0, kinestesico: 0 as const };
     for (const q of this.questions) {
       const val = this.answers[q.id] ?? 0;
       totals[q.type] += val;
     }
-    const vakStyle = (Object.entries(totals).sort((a,b)=>b[1]-a[1])[0][0]) as VAK;
 
+    const order: VAK[] = ['visual','auditivo','kinestesico'];
+    const vals = [totals.visual, totals.auditivo, totals.kinestesico];
+    const max = Math.max(...vals);
+    const winners: VAK[] = order.filter((k,i) => vals[i] === max);
+    const allZero = vals.every(v => v === 0);
+
+    if (allZero || winners.length >= 2) {
+      // Solo muestra los empatados
+      this.pendingTotals = totals;
+      this.tiedStyles = (allZero ? order : winners);
+      this.tiedText = this.humanList(this.tiedStyles.map(s => this.styleLabel(s)));
+      this.selectedStyle = null;
+      this.showStylePicker = true;
+      return;
+    }
+
+    // Ganador único
+    const vakStyle = winners[0];
+    this.persistAndShow(vakStyle, totals);
+  }
+
+  goHome() {
+    this.router.navigateByUrl('/home');
+  }
+
+  private persistAndShow(vakStyle: VAK, totals: {visual:number;auditivo:number;kinestesico:number}) {
     this.auth.updateUser({
       vakStyle,
       vakScores: totals,
@@ -92,42 +126,57 @@ export class Test {
       testDate: new Date().toISOString(),
     })
     .pipe(
-      switchMap(() => this.auth.markFirstLoginDone()),
-      tap(res => {
-        // Si quieres un toast específico SOLO para 'welcome', puedes filtrarlo:
-        const list = res.awardedBadges ?? [];
-        const welcome = list.find(b => b.slug === 'welcome');
-        if (welcome) {
-          this.toast.success('¡Insignia obtenida: Bienvenido/a!', {
-            message: 'Ingresaste por primera vez a EduMath',
-            imageUrl: this.api.absolute(welcome.imageUrl) as string, // o ruta local si prefieres
-            timeoutMs: 3000
-          });
-        }
-        // OJO: markFirstLoginDone ya lanza toasts genéricos por cada insignia; 
-        // si no quieres duplicar, elimina este bloque y confía en markFirstLoginDone().
-      }),
-      switchMap(() => this.auth.refreshMe()),
+      switchMap(() => this.auth.markFirstLoginDone()) // ← ahora devuelve FirstLoginDoneResp
     )
     .subscribe({
-      next: () => {
+      next: (resp) => {
+        // === mostrar insignias SOLO aquí con el guard (ej. 'welcome')
+        const list = resp?.awardedBadges as Array<{ slug:string; title:string; imageUrl?:string; description?:string }> | undefined;
+        const u = this.auth.getCurrentUser();
+        if (u?.id && list?.length) {
+          this.badgeGuard.showNewForUser(u.id, list);
+        }   
+
+        // … resto de tu lógica (UI/estado) …
         this.resultScores = totals;
         this.resultStyle = vakStyle;
         this.showResults = true;
+        this.showStylePicker = false;
         setTimeout(() => this.runConfetti(), 50);
       },
       error: () => {
+        // Manejo de error (sin toasts de insignias)
         this.resultScores = totals;
         this.resultStyle = vakStyle;
         this.showResults = true;
+        this.showStylePicker = false;
         setTimeout(() => this.runConfetti(), 50);
         this.toast.error('No se pudo marcar el primer ingreso', { timeoutMs: 2500 });
       }
     });
   }
 
-  goHome() {
-    this.router.navigateByUrl('/home');
+  confirmPreferredStyle() {
+    if (!this.selectedStyle || !this.pendingTotals) return;
+    this.persistAndShow(this.selectedStyle, this.pendingTotals);
+  }
+  
+  styleLabel(s: VAK): string {
+    return s === 'visual' ? 'Visual' : s === 'auditivo' ? 'Auditivo' : 'Kinestésico';
+  }
+
+  styleDesc(s: VAK): string {
+    switch (s) {
+      case 'visual': return 'Aprendes mejor con imágenes, diagramas y ejemplos vistos.';
+      case 'auditivo': return 'Prefieres escuchar explicaciones y repetir en voz alta.';
+      case 'kinestesico': return 'Aprendes haciendo: manipular, mover, experimentar.';
+    }
+  }
+
+  private humanList(xs: string[]): string {
+    if (xs.length <= 1) return xs[0] ?? '';
+    if (xs.length === 2) return `${xs[0]} y ${xs[1]}`;
+    return `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}`;
   }
 
   // ====== Confetti ligero sin librerías =======

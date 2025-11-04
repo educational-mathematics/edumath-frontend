@@ -1,0 +1,18 @@
+@if (show) {
+  <div class="overlay" aria-live="polite">
+    <div class="card">
+      <div class="img-wrap">
+            <img src="assets/loading.png" alt="Cargando..." draggable="false" />
+      </div>
+
+      <h3 class="headline">Estoy trabajando en esto...</h3>
+      <p class="subline">Esto puede tomar un momento.</p> 
+      <div class="spinner" aria-hidden="true"></div> 
+      @if (currentTip) {
+        <div class="tip">
+          💡 {{ currentTip }}
+        </div>
+      }
+    </div>
+  </div>
+}

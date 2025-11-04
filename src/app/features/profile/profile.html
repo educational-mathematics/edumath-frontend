@@ -11,7 +11,7 @@
       
       <div class="left">
         <div class="avatar-wrap">
-          <img [src]="avatarSrc(me)" alt="Foto de perfil" (error)="onImgError($event)">
+          <img [src]="avatarUrlResolved" alt="Foto de perfil" (error)="onImgError($event)">
           <button class="btn small" (click)="pickFile()" aria-label="Cambiar foto de perfil">Cambiar foto</button>
           <input #fileInput type="file" accept="image/*" (change)="onFileChange($event)" hidden>
         </div>
@@ -75,11 +75,29 @@
           }
         </label>
 
+        @if (aliasError) {
+          <div class="hint error">{{ aliasError }}</div>
+        }
+        
+        @if (aliasSuccess) {
+          <div class="hint ok">{{ aliasSuccess }}</div>
+        }
+      
         <div class="row-edit">
-          <input type="text" formControlName="alias" [readonly]="!editingAlias" placeholder="tu_alias_123" aria-label="Alias">
+          <input
+            type="text"
+            formControlName="alias"
+            [readonly]="!editingAlias"
+            placeholder="tu_alias_123"
+            aria-label="Alias"
+            [class.invalid]="aliasForm.controls.alias.invalid && aliasForm.controls.alias.touched"
+          >
+        
           @if (editingAlias) {
             <div class="actions">
-              <button type="submit" class ="ghost" [disabled]="aliasForm.invalid || loading">{{ loading ? 'Actualizando...' : (me?.alias ? 'Cambiar' : 'Crear') }}</button>
+              <button type="submit" class="ghost" [disabled]="aliasForm.invalid || loading">
+                {{ loading ? 'Actualizando...' : (me?.alias ? 'Cambiar' : 'Crear') }}
+              </button>
               <button type="button" class="ghost" (click)="cancelEditAlias()">Cancelar</button>
             </div>
           }
@@ -108,7 +126,10 @@
                   @if (row.rank === 2) { <span class="medal">🥈</span> }
                   @if (row.rank === 3) { <span class="medal">🥉</span> }
 
-                  <img [src]="row.avatar_url || 'assets/avatar-placeholder.png'" [alt]="'Avatar de ' + row.alias">
+                  <img
+                    [src]="rankAvatarSrc(row.avatar_url)"
+                    [alt]="'Avatar de ' + row.alias"
+                  />
                   <span>{{ row.alias }}</span>
                 </div>
 
@@ -122,7 +143,10 @@
             <div class="my-rank-card">
               <div>{{ myOutside.rank }}</div>
               <div class="alias-cell">
-                <img [src]="myOutside.avatar_url || 'assets/avatar-placeholder.png'" alt="Tu avatar">
+                <img
+                  [src]="rankAvatarSrc(myOutside.avatar_url)"
+                  alt="Tu avatar"
+                />
                 <span>{{ myOutside.alias }}</span>
               </div>
               <div>{{ myOutside.points }}</div>

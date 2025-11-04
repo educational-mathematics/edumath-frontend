@@ -1,0 +1,35 @@
+@if (hasItem) {
+  <mat-card class="activity-card">
+    <mat-card-header>
+      <mat-card-title>{{ item.title }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @switch (item.type) {
+        @case ('drag_to_bucket') {
+          <drag-to-bucket
+            [item]="item"
+            (answerChange)="onChildAnswer($event)">
+          </drag-to-bucket>
+        }
+        @case ('match_pairs') {
+          <match-pairs
+            [item]="item"
+            (answerChange)="onChildAnswer($event)">
+          </match-pairs>
+        }
+        @default {
+          <div class="unsupported">
+            Este ítem no es kinestésico ({{ item }}).
+          </div>
+        }
+      }
+    </mat-card-content>
+
+    @if (item.explain) {
+      <mat-card-footer class="explain">
+        {{ item.explain }}
+      </mat-card-footer>
+    }
+  </mat-card>
+}

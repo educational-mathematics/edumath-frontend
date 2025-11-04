@@ -12,6 +12,7 @@ import { A } from '@angular/cdk/keycodes';
 import { Toast } from '../../../core/toast';
 import { Api } from '../../../core/api';
 import { Auth } from '../../../core/auth';
+import { BadgeToastGuard } from '../../../core/badge-toast-guard';
 
 type VAK = 'visual'|'auditivo'|'kinestesico';
 type AudioState = 'loading' | 'stopped' | 'playing';
@@ -41,6 +42,9 @@ export class TopicPlay {
   private toast = inject(Toast);
   private api = inject(Api);
   private auth = inject(Auth);
+  private guard = inject(BadgeToastGuard);
+
+  private finishing = false;
 
   private abs(u?: string | null) {
     if (!u) return '';
@@ -269,24 +273,18 @@ export class TopicPlay {
   }
 
   private async doFinishFlow() {
+    if (this.finishing) return;
+    this.finishing = true;
+  
     try {
       const r = await firstValueFrom(this.topics.finish(this.sessionId, this.elapsedSec));
-
-      // === NUEVO: toasts por insignias ganadas en este finish ===
-      const list = (r as any)?.awardedBadges as Array<{
-        slug: string; title: string; imageUrl: string;
-      }> | undefined;
-
-      if (Array.isArray(list) && list.length) {
-        // mostramos una por una; el backend ya es idempotente por sesión
-        for (const b of list) {
-          this.toast.success(`¡Insignia obtenida: ${b.title}!`, {
-            imageUrl: this.api.absolute?.(b.imageUrl) ?? (b.imageUrl?.startsWith('http') ? b.imageUrl : (this.apiBase + b.imageUrl)),
-            timeoutMs: 4000
-          });
-        }
+    
+      const awarded = (r as any)?.awardedBadges as Array<{ slug:string; title:string; imageUrl?:string; description?:string }> | undefined;
+      const u = this.auth.getCurrentUser();
+      if (u?.id && awarded?.length) {
+        this.guard.showNewForUser(u.id, awarded);
       }
-
+    
       this.auth.refreshMe().subscribe({ error: () => {} });
     
       this.finishStats = {
@@ -295,18 +293,14 @@ export class TopicPlay {
         precisionPct: r.precisionPct ?? Math.round((this.currentIndex / (this.items?.length || 10)) * 100)
       };
     } catch {
-      const mistakes = (this.items ?? []).reduce(
-        (acc, _it, i) => acc + (this.items[i]?.__wrongAttempts || 0), 0
-      );
-      this.finishStats = {
-        timeSec: this.elapsedSec,
-        mistakes,
-        precisionPct: Math.round((this.currentIndex / (this.items?.length || 10)) * 100)
-      };
+      const mistakes = (this.items ?? []).reduce((acc, _it, i) => acc + (this.items[i]?.__wrongAttempts || 0), 0);
+      this.finishStats = { timeSec: this.elapsedSec, mistakes, precisionPct: Math.round((this.currentIndex / (this.items?.length || 10)) * 100) };
+    } finally {
+      this.showFinish = true;
+      clearInterval(this.ticker);
+      setTimeout(() => this.startConfetti(), 100);
+      this.finishing = false;
     }
-    this.showFinish = true;
-    clearInterval(this.ticker);
-    setTimeout(() => this.startConfetti(), 100);
   }
 
   startConfetti() {

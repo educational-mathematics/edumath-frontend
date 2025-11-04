@@ -6,6 +6,7 @@ import { LoginRequest } from './models/login.model';
 import { RegisterRequest } from './models/register.model';
 import { RankingRow } from './models/ranking.model';
 import { Toast } from './toast';
+import { BadgeToastGuard } from './badge-toast-guard';
 
 type Purpose = 'register' | 'reset_password';
 
@@ -26,6 +27,8 @@ interface FirstLoginDoneResp {
 export class Auth {
   private toast = inject(Toast);
   private api = inject(Api);
+
+  private guard = inject(BadgeToastGuard);
 
   private tokenKey = 'token';
   private userKey  = 'user';
@@ -293,17 +296,27 @@ export class Auth {
   }
 
   markFirstLoginDone() {
+   //return this.api.post<FirstLoginDoneResp>('/users/me/first-login-done', {}).pipe(
+   //  tap(resp => {
+   //    const list = resp.awardedBadges ?? [];
+   //    for (const b of list) {
+   //      this.toast.success(`¡Insignia obtenida! ${b.title}`, {
+   //        imageUrl: this.api.absolute(b.imageUrl),
+   //        timeoutMs: 4000,
+   //        badgeSlug: b.slug   // ← NUEVO
+   //      });
+   //    }
+   //  }),
+   //  switchMap(() => this.refreshMe())
+   //);
     return this.api.post<FirstLoginDoneResp>('/users/me/first-login-done', {}).pipe(
-      tap(resp => {
-        const list = resp.awardedBadges ?? [];
-        for (const b of list) {
-          this.toast.success(`¡Insignia obtenida! ${b.title}`, {
-            imageUrl: this.api.absolute(b.imageUrl),
-            timeoutMs: 4000
-          });
-        }
-      }),
-      switchMap(() => this.refreshMe())
-    );
+    // ⚠️ Quitamos el tap que mostraba toasts aquí
+    switchMap((resp) => this.refreshMe().pipe(
+      // para que el caller pueda usar resp.awardedBadges si quiere
+      // devolvemos un objeto que contenga ambos
+      // (si no lo necesitas, puedes devolver solo resp)
+      map(() => resp)
+    ))
+  );
   }
 }

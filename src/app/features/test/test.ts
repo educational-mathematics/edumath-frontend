@@ -10,6 +10,7 @@ import { switchMap, tap } from 'rxjs';
 import { Toast } from '../../core/toast';
 import { Api } from '../../core/api';
 import { inject } from '@angular/core';
+import { BadgeToastGuard } from '../../core/badge-toast-guard';
 
 type VAK = 'visual'|'auditivo'|'kinestesico';
 
@@ -44,6 +45,8 @@ export class Test {
 
   tiedStyles: VAK[] = [];    // estilos empatados
   tiedText = '';             // texto “Visual y Auditivo”, etc.
+
+  private badgeGuard = inject(BadgeToastGuard);
 
   private pendingTotals?: { visual:number; auditivo:number; kinestesico:number };
 
@@ -123,11 +126,18 @@ export class Test {
       testDate: new Date().toISOString(),
     })
     .pipe(
-      switchMap(() => this.auth.markFirstLoginDone()),
-      switchMap(() => this.auth.refreshMe()),
+      switchMap(() => this.auth.markFirstLoginDone()) // ← ahora devuelve FirstLoginDoneResp
     )
     .subscribe({
-      next: () => {
+      next: (resp) => {
+        // === mostrar insignias SOLO aquí con el guard (ej. 'welcome')
+        const list = resp?.awardedBadges as Array<{ slug:string; title:string; imageUrl?:string; description?:string }> | undefined;
+        const u = this.auth.getCurrentUser();
+        if (u?.id && list?.length) {
+          this.badgeGuard.showNewForUser(u.id, list);
+        }   
+
+        // … resto de tu lógica (UI/estado) …
         this.resultScores = totals;
         this.resultStyle = vakStyle;
         this.showResults = true;
@@ -135,6 +145,7 @@ export class Test {
         setTimeout(() => this.runConfetti(), 50);
       },
       error: () => {
+        // Manejo de error (sin toasts de insignias)
         this.resultScores = totals;
         this.resultStyle = vakStyle;
         this.showResults = true;

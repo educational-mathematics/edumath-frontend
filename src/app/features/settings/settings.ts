@@ -17,10 +17,11 @@ export class Settings implements OnInit {
   private auth = inject(Auth);
   private router = inject(Router);
 
-  // ✅ stream del usuario (en lugar de snapshot)
+  // stream del usuario (en lugar de snapshot)
   me$ = this.auth.user$;
 
-  tab: 'seguridad' | 'preferencias' = 'seguridad';
+  //tab: 'seguridad' | 'preferencias' = 'seguridad';
+  tab: 'seguridad' = 'seguridad';
   msg = '';
   err = '';
   loading = false;

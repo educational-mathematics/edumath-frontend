@@ -8,12 +8,12 @@
 
     <div class="tabs">
       <button [class.active]="tab==='seguridad'" (click)="setTab('seguridad')">🔐 Seguridad</button>
-      <button [class.active]="tab==='preferencias'" (click)="setTab('preferencias')">🎨 Preferencias</button>
+      <!--- <button [class.active]="tab==='preferencias'" (click)="setTab('preferencias')">🎨 Preferencias</button> -->
     </div>
 
     @if (msg) { <div class="alert success">{{ msg }}</div> }
 
-    <!-- 👇 stream del usuario -->
+    <!-- stream del usuario -->
     @if (me$ | async; as me) {
 
       @if (tab === 'seguridad') {
@@ -63,7 +63,8 @@
           </form>
         </div>
       }
-
+      
+      <!--
       @if (tab === 'preferencias') {
         <div class="section">
           <div class="field">
@@ -77,6 +78,7 @@
           <button class="primary" (click)="savePrefs()">Guardar preferencias</button>
         </div>
       }
+      -->
 
       <!-- Overlay de desbloqueo -->
       @if (unlockModalOpen) {

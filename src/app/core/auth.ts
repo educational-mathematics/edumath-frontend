@@ -7,6 +7,7 @@ import { RegisterRequest } from './models/register.model';
 import { RankingRow } from './models/ranking.model';
 import { Toast } from './toast';
 import { BadgeToastGuard } from './badge-toast-guard';
+import { environment } from '../../environments/environment';
 
 type Purpose = 'register' | 'reset_password';
 
@@ -67,7 +68,7 @@ export class Auth {
       const u = JSON.parse(raw);
       // normaliza avatar relativo -> absoluto
       if (u?.avatarUrl?.startsWith('/')) {
-        const base = (this as any).api?.['base'] || 'http://localhost:8000';
+        const base = environment.apiUrl;
         u.avatarUrl = base.replace(/\/$/, '') + u.avatarUrl;
       }
       return u as User;
@@ -80,7 +81,7 @@ export class Auth {
     try {
       const u = JSON.parse(raw);
       if (u?.avatarUrl?.startsWith('/')) {
-        const base = (this as any).api?.['base'] || 'http://localhost:8000';
+        const base = environment.apiUrl;
         u.avatarUrl = base.replace(/\/$/, '') + u.avatarUrl;
       }
       return u as User;

@@ -3,8 +3,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Toast } from './toast';
+import { environment } from '../../environments/environment';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = environment.apiUrl;
 const AWARDS_SEEN_KEY = 'awards_seen_v1';
 
 @Injectable({ providedIn: 'root' })

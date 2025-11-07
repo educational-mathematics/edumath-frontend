@@ -161,7 +161,7 @@ export class TopicPlay {
 
     if (this.style === 'auditivo' && this.explanation && !this.ttsUrl) {
       this.audioState = 'loading';
-      fetch('http://localhost:8000/ai/tts', {
+      fetch(`${environment.apiUrl.replace(/\/$/, '')}/ai/tts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: this.explanation, voice: 'es-ES-Standard-A' })

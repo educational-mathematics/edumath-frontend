@@ -367,3 +367,23 @@
   border-radius: .75rem;
   margin-bottom: 1rem;
 }
+
+.btn-btn-secondary {
+    padding: 14px 25px;
+    background-color: #7c7c7c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+    flex: 1 1 auto;
+    min-width: 200px;
+    margin-right: 10px;
+}
+.btn-btn-secondary:hover {
+    background-color: #565656;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px rgba(37, 99, 235, 0.3);
+}

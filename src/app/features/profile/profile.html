@@ -12,8 +12,13 @@
       <div class="left">
         <div class="avatar-wrap">
           <img [src]="avatarUrlResolved" alt="Foto de perfil" (error)="onImgError($event)">
+          <!---
           <button class="btn small" (click)="pickFile()" aria-label="Cambiar foto de perfil">Cambiar foto</button>
           <input #fileInput type="file" accept="image/*" (change)="onFileChange($event)" hidden>
+          -->
+          <button class="btn small" (click)="openAvatarModal()">
+            Cambiar foto
+          </button>
         </div>
 
         <div class="points">
@@ -164,5 +169,25 @@
     </section>
   } @else {
     <p class="muted">Cargando perfil…</p>
+  }
+
+  @if (showAvatarModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <h3>Elige tu avatar</h3>
+      
+        <div class="avatar-grid">
+          @for (a of avatars; track a) {
+            <img 
+              [src]="apiBase + a"
+              (click)="selectAvatar(a)"
+              class="avatar-option"
+            >
+          }
+        </div>
+      
+        <button class="btn" (click)="closeAvatarModal()">Cerrar</button>
+      </div>
+    </div>
   }
 </div>

@@ -98,7 +98,7 @@ export class Assistant implements OnInit, OnDestroy {
     const g = this.history.flatMap(h => h.topics).find(x => x.topicId === topicId);
     const target =
       prefer ? (prefer === 'visual' ? g?.visual : g?.auditivo)
-             : (g?.visual ?? g?.auditivo);
+              : (g?.visual ?? g?.auditivo);
     if (target) {
       this.activeTab = (target.style as VakStyle) || 'visual';
       this.open(target.id);
@@ -191,5 +191,15 @@ export class Assistant implements OnInit, OnDestroy {
 
   get shouldShowParagraphs(): boolean {
     return !!this.current && this.current.style === this.activeTab;
+  }
+
+  regenerate() {
+    if (!this.current) return;
+
+    this.current.status = 'in_progress';
+
+    this.api.regenerate(this.current.id).subscribe(() => {
+      this.open(this.current!.id);
+    });
   }
 }

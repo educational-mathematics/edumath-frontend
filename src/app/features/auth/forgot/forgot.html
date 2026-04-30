@@ -1,39 +1,82 @@
 <div class="container">
   <mat-card class="card">
+
     <mat-card-header class="header-centered">
       <mat-card-title class="logo">Recuperar contraseña</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
+
       <!-- Paso 1 -->
       @if (step === 1) {
-        <form [formGroup]="emailForm" (ngSubmit)="sendCode()">
-          <p>Ingresa tu correo y te enviaremos un código de verificación.</p>
-          <mat-form-field appearance="outline" class="full">
-            <mat-label>Email</mat-label>
-            <input matInput type="email" formControlName="email" placeholder="tucorreo@dominio.com" />
+        <form [formGroup]="emailForm" (ngSubmit)="sendCode()" class="form">
+
+          <p class="description">
+            Ingresa tu correo y te enviaremos un código de verificación.
+          </p>
+
+          <label class="custom-label">Correo electrónico</label>
+          <mat-form-field appearance="outline" class="full custom-field">
+            <mat-icon matPrefix>email</mat-icon>
+            <input matInput type="email" formControlName="email"
+              placeholder="tucorreo@dominio.com" />
           </mat-form-field>
-          <button mat-raised-button color="primary" type="submit" [disabled]="emailForm.invalid || loading">
+
+          <button mat-raised-button type="submit" class="action-button"
+            [disabled]="emailForm.invalid || loading">
+            <mat-icon>send</mat-icon>
             {{ loading ? 'Enviando...' : 'Enviar código' }}
           </button>
+
         </form>
       }
 
       <!-- Paso 2 -->
       @if (step === 2) {
-        <form [formGroup]="resetForm" (ngSubmit)="reset()">
-          <p>Revisa tu correo, ingresa el código y tu nueva contraseña.</p>
-          <mat-form-field appearance="outline" class="full">
-            <mat-label>Código</mat-label>
-            <input matInput type="text" formControlName="code" maxlength="6" placeholder="000000" />
+        <form [formGroup]="resetForm" (ngSubmit)="reset()" class="form">
+
+          <p class="description">
+            Revisa tu correo, ingresa el código y tu nueva contraseña.
+          </p>
+
+          <label class="custom-label">Código</label>
+          <mat-form-field appearance="outline" class="full custom-field">
+            <mat-icon matPrefix>vpn_key</mat-icon>
+            <input matInput type="text" formControlName="code"
+              maxlength="6" placeholder="000000" />
           </mat-form-field>
-          <mat-form-field appearance="outline" class="full">
-            <mat-label>Nueva contraseña</mat-label>
-            <input matInput type="password" formControlName="password" />
+
+          <label class="custom-label">Nueva contraseña</label>
+          <mat-form-field appearance="outline" class="full custom-field">
+            <mat-icon matPrefix>lock</mat-icon>
+
+            <input
+              matInput
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="Nueva contraseña"
+            />
+
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              class="toggle-password"
+              [class.active]="!hidePassword"
+              (click)="hidePassword = !hidePassword"
+            >
+              <mat-icon>
+                {{ hidePassword ? 'visibility_off' : 'visibility' }}
+              </mat-icon>
+            </button>
           </mat-form-field>
-          <button mat-raised-button color="primary" type="submit" [disabled]="resetForm.invalid || loading">
+
+          <button mat-raised-button type="submit" class="action-button"
+            [disabled]="resetForm.invalid || loading">
+            <mat-icon>lock_reset</mat-icon>
             {{ loading ? 'Actualizando...' : 'Actualizar contraseña' }}
           </button>
+
         </form>
       }
 
@@ -44,6 +87,7 @@
       <div class="links">
         <a routerLink="/login">Volver al login</a>
       </div>
+
     </mat-card-content>
   </mat-card>
 </div>

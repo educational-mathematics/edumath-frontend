@@ -27,4 +27,8 @@ export class AssistantApi {
   resumeExplanation(id: string) {
     return this.api.post<{ ok: true }>(`/assistant/explanations/${id}/resume`, {});
   }
+
+  regenerate(id: string) {
+    return this.api.post<{ ok: true }>(`/assistant/explanations/${id}/regenerate`, {});
+  }
 }

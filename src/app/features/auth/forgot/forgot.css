@@ -1,95 +1,204 @@
+/* CONTENEDOR */
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #F0F4F8;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #eef4ff, #dbeafe);
 }
 
+/* FIGURAS */
+.container::before,
+.container::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.container::before {
+  width: 400px;
+  height: 400px;
+  background: #2563eb;
+  top: -100px;
+  left: -100px;
+  opacity: 0.15;
+}
+
+.container::after {
+  width: 300px;
+  height: 300px;
+  background: #f9924b;
+  bottom: -80px;
+  right: -80px;
+  opacity: 0.2;
+}
+
+/* CARD */
 .card {
-    width: 500px;
-    padding: 40px;
-    text-align: center;
-    box-shadow: 0 4px 20px #4B89AC;
-    border-radius: 12px;
-    background-color: #ffffff;
+  width: 480px;
+  padding: 40px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 40px rgba(37, 99, 235, 0.2);
+  z-index: 1;
+  transition: transform 0.3s ease;
 }
 
-.header-centered {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+/*.card:hover {
+  transform: translateY(-5px);
+}*/
+
+/* FORM */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
+/* TÍTULO (igual login) */
 .logo {
-    font-size: 2.5em;
-    font-weight: 700;
-    color: #2563EB;
-    margin-bottom: 30px;
+  font-size: 2.3em;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 25px;
 }
 
-.card p {
-    color: #374472;
-    margin-bottom: 20px;
-    text-align: left;
-    line-height: 1.4;
+/* TEXTO DESCRIPTIVO */
+.description {
+  color: #374472;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  text-align: left;
 }
 
+/* LABEL */
+.custom-label {
+  font-weight: 600;
+  color: #374472;
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+/* INPUT */
 .full {
-    width: 100%;
-    margin-bottom: 25px;
+  width: 100%;
 }
 
-button[mat-raised-button] {
-    width: 100%;
-    padding: 12px;
-    font-size: 1em;
-    font-weight: 600;
-    text-transform: none;
-    background-color: #2563EB;
-    color: #ffffff;
-    border-radius: 8px;
-    border: none;
-    transition: background-color 0.3s ease, transform 0.1s ease;
+/* TEXTO INPUT */
+::ng-deep .mat-mdc-input-element {
+  color: #374472;
 }
 
-button[mat-raised-button]:hover {
-    background-color: #1e4db7;
+/* INPUT STYLES */
+::ng-deep .custom-field .mat-mdc-text-field-wrapper {
+  border-radius: 10px !important;
+  background: #ffffff;
+  transition: all 0.3s ease;
 }
 
-button[mat-raised-button]:active {
-    transform: scale(0.98);
+::ng-deep .custom-field .mdc-notched-outline > * {
+  border-width: 1.5px !important;
+  border-image: linear-gradient(135deg, #2563eb, #f9924b) 1;
 }
 
-button[mat-raised-button][disabled] {
-    background-color: #a5c0f0; /* un azul más claro */
-    color: #e0e0e0;            /* texto más tenue */
-    cursor: not-allowed;
+::ng-deep .custom-field:hover .mdc-notched-outline > * {
+  border-image: linear-gradient(135deg, #4dc6bb, #2563eb) 1;
 }
 
+::ng-deep .custom-field.mat-focused .mdc-notched-outline > * {
+  border-width: 2px !important;
+}
+
+/* ICONOS */
+::ng-deep mat-icon {
+  color: #2563eb;
+  margin-right: 6px;
+}
+
+/* BOTÓN */
+.action-button {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+
+  background: linear-gradient(135deg, #2563eb, #4dc6bb);
+  color: #ffffff !important;
+  border: none;
+
+  transition: all 0.3s ease;
+}
+
+/* ICONO DEL BOTÓN */
+.action-button mat-icon {
+  color: #ffffff !important;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.35);
+}
+
+/* DISABLED */
+.action-button[disabled] {
+  opacity: 0.6;
+  color: #ffffff !important;
+}
+
+/* MENSAJE */
 .msg {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #e3f2fd;
-    color: #0d47a1;
-    border-radius: 8px;
-    text-align: center;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border-radius: 8px;
+  text-align: center;
 }
 
+/* LINK */
 .links {
-    margin-top: 20px;
-    text-align: center;
+  margin-top: 20px;
+  text-align: center;
 }
 
 .links a {
-    color: #2563EB;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
+  color: #2563eb;
+  font-weight: 600;
 }
 
 .links a:hover {
-    text-decoration: underline;
-    color: #1e4db7;
+  text-decoration: underline;
+}
+
+/* TOGGLE PASSWORD */
+::ng-deep .toggle-password {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-right: 4px;
+  cursor: pointer;
+}
+
+::ng-deep .toggle-password mat-icon {
+  font-size: 20px;
+  color: #9ca3af;
+}
+
+::ng-deep .toggle-password:hover mat-icon {
+  color: #2563eb;
+}
+
+::ng-deep .toggle-password.active mat-icon {
+  color: #f9924b;
 }

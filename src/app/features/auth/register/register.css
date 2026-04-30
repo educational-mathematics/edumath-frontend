@@ -1,83 +1,158 @@
+/* CONTENEDOR (MISMO FONDO QUE LOGIN) */
 .register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #F0F4F8;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #eef4ff, #dbeafe);
 }
 
+/* FIGURAS */
+.register-container::before,
+.register-container::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.register-container::before {
+  width: 400px;
+  height: 400px;
+  background: #2563eb;
+  top: -100px;
+  left: -100px;
+  opacity: 0.15;
+}
+
+.register-container::after {
+  width: 300px;
+  height: 300px;
+  background: #f9924b;
+  bottom: -80px;
+  right: -80px;
+  opacity: 0.2;
+}
+
+/* CARD */
 .register-card {
-  width: 500px;
+  width: 480px;
   padding: 40px;
-  text-align: center;
-  box-shadow: 0 4px 20px #4B89AC;
-  border-radius: 12px;
-  background-color: #ffffff;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 40px rgba(37, 99, 235, 0.2);
+  z-index: 1;
+  transition: transform 0.3s ease;
 }
 
-.header-centered {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
+/*.register-card:hover {
+  transform: translateY(-5px);
+}*/
 
-.logo {
-  font-size: 2.5em;
-  font-weight: 700;
-  color: #2563EB;
-  margin-bottom: 30px;
-}
-
+/* FORM */
 .register-form {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
-.full-width-input {
+/* INPUTS */
+.custom-field {
   width: 100%;
-  margin-bottom: 25px;
-  border-color: #2563EB;
 }
 
+::ng-deep .custom-field .mat-mdc-text-field-wrapper {
+  border-radius: 10px !important;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+::ng-deep .custom-field .mdc-notched-outline > * {
+  border-width: 1.5px !important;
+  border-image: linear-gradient(135deg, #2563eb, #f9924b) 1;
+}
+
+::ng-deep .custom-field:hover .mdc-notched-outline > * {
+  border-image: linear-gradient(135deg, #4dc6bb, #2563eb) 1;
+}
+
+::ng-deep .custom-field.mat-focused .mdc-notched-outline > * {
+  border-width: 2px !important;
+}
+
+/* ICONOS */
+::ng-deep mat-icon {
+  color: #2563eb;
+  margin-right: 6px;
+}
+
+/* BOTÓN */
 .register-button {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
   width: 100%;
-  padding: 12px 0;
-  font-size: 1.1em;
+  padding: 12px;
+  border-radius: 10px;
   font-weight: 600;
-  text-transform: none;
-  background-color: #2563EB;
-  color: #ffffff;
-  border-radius: 8px;
+
+  background: linear-gradient(135deg, #2563eb, #4dc6bb);
+  color: white;
   border: none;
-  transition: background-color 0.3s ease, transform 0.1s ease;
+
+  transition: all 0.3s ease;
 }
 
 .register-button:hover {
-  background-color: #1e4db7;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.35);
 }
 
-.register-button:active {
-  transform: scale(0.98);
+/* TÍTULO (igual que login) */
+.logo {
+  font-size: 2.3em;
+  font-weight: 700;
+  color: #2563eb; /* azul principal */
+  margin-bottom: 25px;
 }
 
-.login-link-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  border-top: 1px solid #e0e0e0;
-  padding-top: 20px;
+/* LABELS (más visibles como login) */
+.custom-label {
+  font-weight: 600;
+  color: #374472; /* mismo tono que login */
+  text-align: left;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
 }
 
+/* INPUT TEXTO */
+::ng-deep .mat-mdc-input-element {
+  font-size: 0.95rem;
+  color: #374472;
+}
+
+/* PLACEHOLDER (igual estilo login) */
+::ng-deep .mat-mdc-input-element::placeholder {
+  color: #6b7280; /* gris medio */
+  opacity: 1;
+}
+
+/* TEXTO INFERIOR */
 .login-text {
   font-size: 0.9em;
   color: #374472;
-  margin: 0;
 }
 
+/* LINK */
 .login-link {
-  color: #2563EB;
-  text-decoration: none;
+  color: #2563eb;
   font-weight: 600;
   margin-left: 5px;
 }
@@ -86,30 +161,17 @@
   text-decoration: underline;
 }
 
-.custom-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #374472;
-  text-align: left;
-}
-
-.invalid-input {
-  border: 1px solid red;
-}
-
+/* NOTIFICACIÓN (MISMO ESTILO) */
 .notification {
   position: fixed;
   top: 20px;
   right: 20px;
   color: white;
   padding: 12px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
-  align-items: center;
   gap: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
 .notification.error {
@@ -120,10 +182,39 @@
   background: #4caf50;
 }
 
-.notification button {
+/* BOTÓN SHOW/HIDE SIMPLE */
+::ng-deep .toggle-password {
   background: transparent;
   border: none;
-  color: white;
+  padding: 0;
+  margin-right: 4px;
+  width: auto;
+  height: auto;
   cursor: pointer;
-  font-size: 14px;
+}
+
+/* ICONO */
+::ng-deep .toggle-password mat-icon {
+  font-size: 20px;
+  color: #9ca3af; /* gris suave */
+  transition: color 0.2s ease;
+}
+
+/* HOVER */
+::ng-deep .toggle-password:hover mat-icon {
+  color: #2563eb; /* azul */
+}
+
+/* ACTIVO (mostrando contraseña) */
+::ng-deep .toggle-password.active mat-icon {
+  color: #f9924b; /* naranja */
+}
+
+/* QUITAR EFECTOS DEFAULT DE MATERIAL */
+::ng-deep .toggle-password .mat-mdc-button-touch-target {
+  display: none;
+}
+
+::ng-deep .toggle-password .mat-ripple {
+  display: none;
 }

@@ -7,11 +7,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule, Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-forgot',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, RouterModule, MatIconModule],
   templateUrl: './forgot.html',
   styleUrl: './forgot.css',
 })
@@ -24,6 +25,8 @@ export class Forgot {
   message = '';
   step: 1 | 2 = 1;
   email = '';
+
+  hidePassword = true;
 
   emailForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],

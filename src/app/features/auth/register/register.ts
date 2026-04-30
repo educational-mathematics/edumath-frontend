@@ -7,10 +7,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-register',
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, RouterModule, MatIconModule],
   templateUrl: './register.html',
   styleUrl: './register.css'
 })
@@ -21,6 +22,8 @@ export class Register {
   notificationType: 'success' | 'error' = 'error';
   registerAttempted = false;
   loading = false;
+
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,

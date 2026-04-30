@@ -7,10 +7,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, RouterModule, MatIconModule, MatIconModule],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -20,6 +21,7 @@ export class Login {
   notificationMessage = '';
   loginAttempted = false;
   loading = false;
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,

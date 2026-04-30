@@ -8,6 +8,7 @@ import { RankingRow } from './models/ranking.model';
 import { Toast } from './toast';
 import { BadgeToastGuard } from './badge-toast-guard';
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 
 type Purpose = 'register' | 'reset_password';
 
@@ -28,6 +29,7 @@ interface FirstLoginDoneResp {
 export class Auth {
   private toast = inject(Toast);
   private api = inject(Api);
+  private router = inject(Router);
 
   private guard = inject(BadgeToastGuard);
 
@@ -162,6 +164,20 @@ export class Auth {
         tap(u => this.setSession(u, sessionStorage.getItem(this.tokenKey))),
         catchError(err => {
           this.setSession(null, null);
+        
+          if (err?.error?.detail === 'EMAIL_NOT_VERIFIED') {
+            this.toast.info('Debes verificar tu correo antes de iniciar sesión');
+          
+            sessionStorage.setItem('allowVerifyEmail', '1');
+          
+            this.router.navigate(['register/verify-email'], {
+              queryParams: { email: data.email }
+            });
+          
+            return of(null);
+          }
+        
+          this.toast.error(err?.error?.detail || 'Error al iniciar sesión');
           return of(null);
         })
       );

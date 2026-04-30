@@ -44,6 +44,10 @@ export class Profile implements OnInit, OnDestroy {
   top100: RankingRow[] = [];
   myOutside: RankingRow | null = null;
 
+  avatars: string[] = [];
+
+  showAvatarModal = false;
+
   // preview de avatar
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   avatarPreview: string | null = null;
@@ -123,6 +127,16 @@ export class Profile implements OnInit, OnDestroy {
     // Forzar refresco al abrir la vista para que me?.points esté al día
     this.auth.refreshMe().subscribe({
       error: () => {} // silencioso
+    });
+    
+    this.api.get<string[]>('/users/avatars').subscribe({
+      next: (a) => {
+        console.log('avatars:', a); // 👈 DEBUG
+        this.avatars = a;
+      },
+      error: (err) => {
+        console.error('error avatars:', err); // 👈 CLAVE
+      }
     });
   }
 
@@ -309,5 +323,30 @@ export class Profile implements OnInit, OnDestroy {
   
   onImgError(ev: Event) {
     (ev.target as HTMLImageElement).src = 'assets/avatar-placeholder.png';
+  }
+
+  openAvatarModal() {
+    this.showAvatarModal = true;
+  }
+
+  closeAvatarModal() {
+    this.showAvatarModal = false;
+  }
+
+  selectAvatar(a: string) {
+    this.loading = true;
+
+    this.api.post('/users/me/avatar/select', { avatar: a }).subscribe({
+      next: () => {
+        this.loading = false;
+        this.showAvatarModal = false;
+
+        this.avatarVer = Date.now(); // rompe cache
+        this.auth.refreshMe().subscribe();
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
   }
 }

@@ -146,6 +146,12 @@
               </div>
             }
           <div class="footer-actions">
+
+            @if (current.status === 'completed') {
+              <button class="btn-btn-secondary" (click)="regenerate()">
+                Regenerar (si algo no cargó)
+              </button>
+            }
             <button class="btn" (click)="closeDetail()">Volver</button>
           </div>
         </section>
